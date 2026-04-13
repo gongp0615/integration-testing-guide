@@ -1,102 +1,103 @@
 # Integration Testing Guide
 
-大型游戏项目集成测试技术指南
+Technical Guide for Integration Testing in Large-Scale Game Projects
 
-[English](./README_EN.md)
+[中文版](./README.md)
 
-## 目录
+## Table of Contents
 
-- [问题](#问题)
-- [解决方案：让 AI 像技术专家一样分析运行时环境和数据，做全面的回归测试](#解决方案让-ai-像技术专家一样分析运行时环境和数据做全面的回归测试)
-  - [1. 看数据](#1-看数据)
-  - [2. 断点](#2-断点)
-  - [3. 看日志](#3-看日志)
-  - [4. 工程实践](#4-工程实践)
-- [核心思想](#核心思想)
-- [项目示例实战验证](#项目示例实战验证)
-  - [basic — 基础流程验证](#basic--基础流程验证)
-  - [cross-module — 跨模块关联](#cross-module-跨模块关联)
-  - [edge-case — 边界测试](#edge-case-边界测试)
-- [测试结果汇总](#测试结果汇总)
+- [The Problem](#the-problem)
+- [Solution: Let AI Analyze Runtime Environment and Data Like a Technical Expert for Comprehensive Regression Testing](#solution-let-ai-analyze-runtime-environment-and-data-like-a-technical-expert-for-comprehensive-regression-testing)
+  - [1. Inspect Data](#1-inspect-data)
+  - [2. Breakpoints](#2-breakpoints)
+  - [3. Inspect Logs](#3-inspect-logs)
+  - [4. Engineering Practice](#4-engineering-practice)
+- [Core Idea](#core-idea)
+- [Project Demo Verification](#project-demo-verification)
+  - [basic — Basic Flow Verification](#basic--basic-flow-verification)
+  - [cross-module — Cross-Module Correlation](#cross-module--cross-module-correlation)
+  - [edge-case — Edge Case Testing](#edge-case--edge-case-testing)
+- [Test Results Summary](#test-results-summary)
 
 ---
 
-## 问题
+## The Problem
 
-现在的游戏集成测试环境需要依赖开发人员事先写好测试用例，针对业务用指定或者随机的参数简单校验一下业务逻辑。现在 AI 开发时代，应该有个更好的方案，让集成测试真正体现出"集成测试"。
+Current game integration testing environments rely on developers writing test cases in advance, which simply verify business logic with specified or random parameters. In the era of AI-driven development, there should be a better approach that makes integration testing truly live up to its name.
 
-传统的集成测试仅仅是对每个测试用例单独构建一个环境跑事先编写好的测试逻辑。游戏项目是复杂的：
+Traditional integration testing merely builds a separate environment for each test case to run pre-written test logic. Game projects are complex:
 
-1. **战斗系统**。属性繁多、技能效果和状态多样，问题的组合是一个庞大的规模。
-2. **场景**。对拥有场景的项目来说，数量众多的 entity 相互之间产生的影响也是难以用测试用例覆盖全面。
-3. **跨模块关联**。常规业务模块之间的关联测试用例只能管单业务的逻辑，产生关联影响的情况实际会很多，例如物品进入背包，是否正确触发任务、成就等等。
+1. **Combat Systems**. Numerous attributes, skill effects and states — the combinations of potential issues are massive.
+2. **Scenes**. For projects with scenes, the interactions among numerous entities are difficult to cover comprehensively with test cases.
+3. **Cross-Module Correlations**. Conventional cross-module test cases can only verify individual business logic, while in practice there are many correlated impacts — for example, when an item enters the bag, whether it correctly triggers tasks, achievements, etc.
 
-当出现这些复杂问题，工程师是怎么解决的？
+When these complex problems arise, how do engineers solve them?
 
-> 调试、断点、查日志、看各个模块的日志输出顺序和数据。
+> Debug, set breakpoints, check logs, examine the log output order and data across modules.
 
-## 解决方案：让 AI 像技术专家一样分析运行时环境和数据，做全面的回归测试
+## Solution: Let AI Analyze Runtime Environment and Data Like a Technical Expert for Comprehensive Regression Testing
 
-### 1. 看数据
+### 1. Inspect Data
 
-项目暴露 CLI 接口，让项目符合现主流的渐进式披露。例如常规的个人模块：
+The project exposes CLI interfaces, conforming to the mainstream progressive disclosure pattern. For example, a typical player module:
 
 ```bash
 cli -playermgr (xxxx:playerid) -bag itemid:xxxx
 ```
 
-可以根据需要多暴露几个接口：
+Additional interfaces can be exposed as needed:
 
 ```bash
-cli -playermgr xxxx -bag type:xx    # 按类型查看
-cli -playermgr xxxx -task xxxx      # 查看任务
+cli -playermgr xxxx -bag type:xx    # View by type
+cli -playermgr xxxx -task xxxx      # View tasks
 ```
 
-这样 AI 可以自己决定看哪些模块。
+This allows AI to decide which modules to inspect on its own.
 
-### 2. 断点
+### 2. Breakpoints
 
-项目要支持 AI 断点接口，等价于保留了运行时环境。不论底层是 update 还是 actor 模式，都预留 AI 驱动的接口：
+The project must support AI breakpoint interfaces, which is equivalent to preserving the runtime environment. Whether the underlying implementation uses updates or the actor model, AI-driven interfaces should be reserved:
 
 ```bash
-cli -next    # 执行一次 update 或处理一次 message
+cli -next    # Execute one update or process one message
 ```
 
-对应程序就执行一次 update，或从 message_queue 中取出一条消息完成分发处理。
+The corresponding program executes one update, or dequeues one message from the message_queue for dispatch processing.
 
-### 3. 看日志
+### 3. Inspect Logs
 
-配合 AI 自主断点可以有效地逐步产生日志，而不会像瀑布一样的涌入上下文。
+Combined with AI-driven autonomous breakpoints, logs can be generated step by step effectively, rather than flooding the context like a waterfall.
 
-### 4. 工程实践
+### 4. Engineering Practice
 
-在实际开发中，应该是以通信的方式来替代 CLI（本质上等价）。例如使用 Telnet 或者 TCP + JSON Lines 等等，后者是可以结构化的方式输出，直接上 WebSocket + JSON 也是不错的。
+In actual development, communication should replace CLI (which is essentially equivalent). For example, using Telnet or TCP + JSON Lines, etc. The latter can output in a structured format, using WebSocket + JSON directly is also a good choice.
 
-AI 可以自己维护这套 CLI，因为主要就是给 AI 用的。让大模型自己推理增加修改整个游戏项目的 CLI，使其更全面。
+AI can maintain this CLI system itself, since it's primarily designed for AI usage. Let the large model reason and incrementally modify the game project's CLI to make it more comprehensive.
 
 ```bash
 nc 127.0.0.1 5400
-# 请求
+# Request
 > {"cmd": "playermgr", "playerId": 10001, "sub": "bag", "itemId": 2001}
-# 响应
+# Response
 < {"ok": true, "data": {"itemId": 2001, "count": 5, "source": "drop"}}
-# 断点
+# Breakpoint
 > {"cmd": "next"}
 < {"ok": true, "log": ["[Bag] add item 2001 x5", "[Task] trigger 3001 progress+1"]}
 ```
 
-在实践中，需要考虑底层实现做对应调整。例如在 Skynet 的 actor 模型中，AI 需要介入的单元是每个 service（工作区固定，不管是哪个 worker_thread 来驱动 service 都是继续推进指令）。在 Golang 服务器中，应将并发控制的关注点从执行单元（goroutine）提升到通信语义（channel）。由于 goroutine 与逻辑实体之间不存在固定映射关系，系统设计应围绕"状态归属 + 消息流"展开，而不是围绕 goroutine 的创建与生命周期管理。goroutine 仅作为运行时执行载体存在。
+In practice, corresponding adjustments need to be made at the implementation level. For example, in Skynet's actor model, the unit AI needs to intervene in is each service (the workspace is fixed — regardless of which worker_thread drives the service, it continues advancing instructions). In Go servers, the focus of concurrency control should be elevated from execution units (goroutines) to communication semantics (channels). Since there is no fixed mapping between goroutines and logical entities, system design should revolve around "state ownership + message flow" rather than goroutine creation and lifecycle management. Goroutines exist merely as runtime execution carriers.
 
 ---
 
-# 核心思想
-下面的例子验证了想法是可行的，在日常开发中，将每个模块的条件写好在规则里，同时把模块的关联维护在wiki中，让agent去根据业务逻辑和规则分析所影响模块的日志。例如bag和task、achievement有事件关联,每次背包additem，事件应该只触发一次。根据task的规则和进入背包的物品，推断应该哪些任务被影响。achievement也是如此。这里没有写战斗的例子，但本质是一样，场景上分布N个entity在不同的位置。在agent调试期间，服务器内部的自驱动停止，改为agent驱动，agent通过cmd获取entityid和使用技能，再通过cmd获取当前区域的entity基本信息，判断命中目标是不是符合设定，再到计算属性和战斗公式，都可以让agent逐条校验。另外在开发阶段可以把日志都加上debug信息，例如[2026-04-13 12:00:00] bag.go additem:136，时间戳+文件名+函数名+行号，让agent经常扫描日志文件，例如通过grep -C 10 关键词来发现业务间的关系，当然最终写入wiki需要人来审核，逐步完善和更新 。此方法我认为也同样适用于其他行业
+# Core Idea
 
-## 项目示例实战验证
+The examples below demonstrate that the approach is feasible. In daily development, define conditions for each module in rules, and maintain cross-module correlations in a wiki, allowing the agent to analyze affected modules' logs based on business logic and rules. For instance, if bag and task/achievement have event correlations, every bag additem should trigger the event exactly once. Based on task rules and items entering the bag, the agent can infer which tasks should be affected. The same applies to achievements. No combat examples are shown here, but the principle is the same — N entities distributed at different positions in a scene. During agent debugging, the server's internal self-driving stops and switches to agent-driven mode. The agent obtains entity IDs and skill usage via cmd, then retrieves basic information of entities in the current area via cmd, verifying whether hit targets match the design, and then checking attribute calculations and combat formulas — all of which can be verified step by step by the agent. Additionally, during development, debug information can be added to logs, such as `[2026-04-13 12:00:00] bag.go additem:136` — timestamp + filename + function name + line number. Let the agent frequently scan log files, for example using `grep -C 10 keyword` to discover relationships between business modules, though writing to the wiki ultimately requires human review for gradual improvement and updates. I believe this approach is also applicable to other industries.
 
-基于上述架构模式，我们实现了完整的项目示例 [ai-integration-test-demo](./ai-integration-test-demo/)，使用 Go + WebSocket + GLM-5.1 进行 AI 驱动集成测试。以下为三个测试场景的完整执行日志（API Key 已脱敏）。
+## Project Demo Verification
 
-### basic — 基础流程验证
+Based on the architectural pattern described above, we implemented a complete project demo [ai-integration-test-demo](./ai-integration-test-demo/), using Go + WebSocket + GLM-5.1 for AI-driven integration testing. Below are the complete execution logs for three test scenarios (API Key has been redacted).
+
+### basic — Basic Flow Verification
 
 ```terminal
 $ ./bin/server -mode test -scenario basic -api-key *** -model glm-5.1 -base-url https://open.bigmodel.cn/api/paas/v4
@@ -186,10 +187,10 @@ None found.
    unlocked, 4003 stays locked. Its name suggests it might require 100% collection.
 3. **No idempotency guard visible**: The logs don't show whether re-triggering task 3001
    completion or achievement 4001 unlock would be safely ignored.
-=================================
+================================
 ```
 
-### cross-module — 跨模块关联
+### cross-module — Cross-Module Correlation
 
 ```terminal
 $ ./bin/server -mode test -scenario cross-module -api-key *** -model glm-5.1 -base-url https://open.bigmodel.cn/api/paas/v4
@@ -338,10 +339,10 @@ $ ./bin/server -mode test -scenario cross-module -api-key *** -model glm-5.1 -ba
    single atomic addition, but the task system doesn't respect the count.
 3. **Achievement 4003 trigger timing**: Achievement 4003 unlocked in the same step as
    achievement 4002, which is correct but means it's tightly coupled.
-=================================
+================================
 ```
 
-### edge-case — 边界测试
+### edge-case — Edge Case Testing
 
 ```terminal
 $ ./bin/server -mode test -scenario edge-case -api-key *** -model glm-5.1 -base-url https://open.bigmodel.cn/api/paas/v4
@@ -480,19 +481,19 @@ reject any `count <= 0` before processing.
    triggered task 3002 progress by +1 (not +2).
 2. **No rollback mechanism**: If a remove operation partially succeeds before failing,
    there's no evidence of transactional safety.
-=================================
+================================
 ```
 
 ---
 
-## 测试结果汇总
+## Test Results Summary
 
-三个场景全部跑完，GLM-5.1 自主发现了真实 bug：
+All three scenarios completed, and GLM-5.1 autonomously discovered real bugs:
 
-| 场景 | 结果 |
-|------|------|
-| basic | 8/8 通过，跨模块链正常 |
-| cross-module | 7/7 通过，但发现 Bug: 批量添加物品时任务进度只+1而非按数量累加 |
-| edge-case | 4/5 通过，发现 🔴 严重Bug: removeitem 负数 count 未校验，可被利用无限刷物品且绕过跨模块触发 |
+| Scenario | Result |
+|----------|--------|
+| basic | 8/8 passed, cross-module chain working correctly |
+| cross-module | 7/7 passed, but discovered Bug: task progress only increments by +1 instead of by item count when adding items in bulk |
+| edge-case | 4/5 passed, discovered 🔴 Critical Bug: removeitem with negative count has no validation, can be exploited for unlimited item duplication and bypasses cross-module triggers |
 
-AI 自主发现的两个 bug 是项目中真实存在的代码缺陷（`task.go` 硬编码 `Progress(tid, 1)`；`bag.go` 的 `RemoveItem` 缺少 `count <= 0` 校验），说明这个 AI 驱动集成测试方案是有效的。
+The two bugs autonomously discovered by AI are real code defects in the project (`task.go` hardcodes `Progress(tid, 1)`; `bag.go`'s `RemoveItem` lacks `count <= 0` validation), demonstrating that this AI-driven integration testing approach is effective.
