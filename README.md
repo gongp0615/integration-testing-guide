@@ -50,3 +50,20 @@ cli -next    # 执行一次 update 或处理一次 message
 ### 3. 看日志
 
 AI 分析日志是高效的，配合 AI 自主断点可以有效地逐步产生日志，而不会像瀑布一样的涌入上下文。
+
+### 4. 工程实践
+
+在实际开发中，应该是以通信的方式来替代 CLI（本质上等价）。例如使用 Telnet 或者 TCP + JSON Lines 等等，后者是可以以结构化的方式输出，直接上 WebSocket + JSON 也是不错的。
+
+AI 可以自己维护这套 CLI，因为主要就是给 AI 用的。让大模型自己推理增加修改整个游戏项目的 CLI，使其更全面。
+
+```bash
+nc 127.0.0.1 5400
+# 请求
+> {"cmd": "playermgr", "playerId": 10001, "sub": "bag", "itemId": 2001}
+# 响应
+< {"ok": true, "data": {"itemId": 2001, "count": 5, "source": "drop"}}
+# 断点
+> {"cmd": "next"}
+< {"ok": true, "log": ["[Bag] add item 2001 x5", "[Task] trigger 3001 progress+1"]}
+```
