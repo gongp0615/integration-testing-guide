@@ -67,3 +67,5 @@ nc 127.0.0.1 5400
 > {"cmd": "next"}
 < {"ok": true, "log": ["[Bag] add item 2001 x5", "[Task] trigger 3001 progress+1"]}
 ```
+
+在实践中，需要考虑底层实现做对应调整。例如在 Skynet 的 actor 模型中，AI 需要介入的单元是每个 service（工作区固定，不管是哪个 worker_thread 来驱动 service 都是继续推进指令）。在 Golang 服务器中，应将并发控制的关注点从执行单元（goroutine）提升到通信语义（channel）。由于 goroutine 与逻辑实体之间不存在固定映射关系，系统设计应围绕"状态归属 + 消息流"展开，而不是围绕 goroutine 的创建与生命周期管理。goroutine 仅作为运行时执行载体存在。
