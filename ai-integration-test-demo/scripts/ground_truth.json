@@ -1,0 +1,23 @@
+{
+  "correlations": [
+    {"id": "R1", "source": "Bag", "target": "Task", "event": "item.added", "detail": "item 2001 -> task 3001 progress+1"},
+    {"id": "R2", "source": "Bag", "target": "Task", "event": "item.added", "detail": "item 2002 -> task 3002 progress+1"},
+    {"id": "R3", "source": "Task", "target": "Achievement", "event": "task.completed", "detail": "task completion triggers achievement unlock"},
+    {"id": "R4", "source": "Achievement", "target": "Achievement", "event": "item.added", "detail": "internal: >=2 unlocked achievements -> collector_100"},
+    {"id": "R5", "source": "Bag", "target": "Equipment", "event": "item.added", "detail": "equipable items trigger auto-equip"},
+    {"id": "R6", "source": "Equipment", "target": "Achievement", "event": "equip.success", "detail": "weapon+armor -> fully_equipped achievement"},
+    {"id": "R7", "source": "SignIn", "target": "Mail", "event": "signin.claimed", "detail": "sign-in triggers reward mail"},
+    {"id": "R8", "source": "Achievement", "target": "Mail", "event": "achievement.unlocked", "detail": "achievement unlock triggers notification mail"},
+    {"id": "R9", "source": "Mail", "target": "NONE", "event": "mail.claimed", "detail": "mail.claimed has no subscriber - broken chain"},
+    {"id": "R10", "source": "Task", "target": "Achievement", "event": "task.completed (repeat)", "detail": "bug B2: completed task re-triggers on subsequent item adds"}
+  ],
+  "bugs": [
+    {"id": "B1", "module": "bag", "level": "L1", "severity": "Critical", "description": "RemoveItem lacks count<=0 check, negative count increases items"},
+    {"id": "B2", "module": "task", "level": "L2", "severity": "High", "description": "Task re-triggers task.completed after completion"},
+    {"id": "B3", "module": "achievement", "level": "L2", "severity": "Medium", "description": "collector_100 counts unlocked achievements instead of item types"},
+    {"id": "B4", "module": "signin", "level": "L3", "severity": "High", "description": "ClaimReward has no independent idempotency guard"},
+    {"id": "B5", "module": "equipment", "level": "L3", "severity": "Critical", "description": "Equip does not consume items from bag"},
+    {"id": "B6", "module": "mail", "level": "L4", "severity": "High", "description": "mail.claimed event published but no subscriber consumes it"},
+    {"id": "B7", "module": "signin+equipment", "level": "L4", "severity": "Medium", "description": "Sign-in day 7 reward itemID 3001 conflicts with equipable weapon ID"}
+  ]
+}
