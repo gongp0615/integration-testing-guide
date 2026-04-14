@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/example/ai-integration-test-demo/ai/knowledge"
 	"github.com/example/ai-integration-test-demo/ai/prompt"
 	"github.com/example/ai-integration-test-demo/ai/session"
 	"github.com/example/ai-integration-test-demo/ai/tools"
@@ -18,9 +19,10 @@ type Agent struct {
 	model       string
 	mode        string
 	codeSummary string
+	fm          *knowledge.FileManager
 }
 
-func New(apiKey, model, baseURL string, sess *session.Session, mode string, codeSummary string) *Agent {
+func New(apiKey, model, baseURL string, sess *session.Session, mode string, codeSummary string, fm *knowledge.FileManager) *Agent {
 	cfg := oai.DefaultConfig(apiKey)
 	if baseURL != "" {
 		cfg.BaseURL = baseURL
@@ -31,6 +33,7 @@ func New(apiKey, model, baseURL string, sess *session.Session, mode string, code
 		model:       model,
 		mode:        mode,
 		codeSummary: codeSummary,
+		fm:          fm,
 	}
 }
 
@@ -113,22 +116,57 @@ func (a *Agent) Run(ctx context.Context, taskDesc string) (string, error) {
 }
 
 func (a *Agent) handleToolCall(tc oai.ToolCall) (string, error) {
-	if tc.Function.Name != "send_command" {
+	switch tc.Function.Name {
+	case "send_command":
+		var params tools.SendCommandParams
+		if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
+			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		log.Printf("AI → %s %+v", params.Cmd, params)
+		result, err := a.session.SendCommand(params)
+		if err != nil {
+			return "", err
+		}
+		out, _ := json.MarshalIndent(result, "", "  ")
+		return string(out), nil
+
+	case "read_file":
+		var params tools.ReadFileParams
+		if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
+			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		log.Printf("AI → read_file %s", params.Path)
+		content, err := a.fm.ReadFile(params.Path)
+		if err != nil {
+			return err.Error(), nil
+		}
+		return content, nil
+
+	case "search_code":
+		var params tools.SearchCodeParams
+		if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
+			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		log.Printf("AI → search_code %s %q", params.Directory, params.Pattern)
+		results, err := a.fm.SearchCode(params.Directory, params.Pattern)
+		if err != nil {
+			return err.Error(), nil
+		}
+		out, _ := json.MarshalIndent(results, "", "  ")
+		return string(out), nil
+
+	case "update_knowledge":
+		var params tools.UpdateKnowledgeParams
+		if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
+			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		log.Printf("AI → update_knowledge (%d bytes)", len(params.Content))
+		if err := a.fm.UpdateKnowledge(params.Content); err != nil {
+			return err.Error(), nil
+		}
+		return "knowledge.md updated", nil
+
+	default:
 		return "", fmt.Errorf("unknown tool: %s", tc.Function.Name)
 	}
-
-	var params tools.SendCommandParams
-	if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
-		return "", fmt.Errorf("invalid arguments: %w", err)
-	}
-
-	log.Printf("AI → %s %+v", params.Cmd, params)
-
-	result, err := a.session.SendCommand(params)
-	if err != nil {
-		return "", err
-	}
-
-	out, _ := json.MarshalIndent(result, "", "  ")
-	return string(out), nil
 }
