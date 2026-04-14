@@ -3,15 +3,21 @@ package player
 import (
 	"github.com/example/ai-integration-test-demo/internal/achievement"
 	"github.com/example/ai-integration-test-demo/internal/bag"
+	"github.com/example/ai-integration-test-demo/internal/equipment"
 	"github.com/example/ai-integration-test-demo/internal/event"
+	"github.com/example/ai-integration-test-demo/internal/mail"
+	"github.com/example/ai-integration-test-demo/internal/signin"
 	"github.com/example/ai-integration-test-demo/internal/task"
 )
 
 type Player struct {
-	ID          int
-	Bag         *bag.Bag
-	Tasks       *task.TaskSystem
+	ID           int
+	Bag          *bag.Bag
+	Tasks        *task.TaskSystem
 	Achievements *achievement.AchievementSystem
+	Equipment    *equipment.EquipmentSystem
+	SignIn       *signin.SignInSystem
+	Mail         *mail.MailSystem
 }
 
 type Manager struct {
@@ -28,10 +34,13 @@ func NewManager(bus *event.Bus) *Manager {
 
 func (m *Manager) CreatePlayer(id int) *Player {
 	p := &Player{
-		ID:          id,
-		Bag:         bag.New(id, m.bus),
-		Tasks:       task.New(id, m.bus),
+		ID:           id,
+		Bag:          bag.New(id, m.bus),
+		Tasks:        task.New(id, m.bus),
 		Achievements: achievement.New(id, m.bus),
+		Equipment:    equipment.New(id, m.bus),
+		SignIn:       signin.New(id, m.bus),
+		Mail:         mail.New(id, m.bus),
 	}
 	m.players[id] = p
 
@@ -41,6 +50,7 @@ func (m *Manager) CreatePlayer(id int) *Player {
 	p.Achievements.AddAchievement(4001, "first_task")
 	p.Achievements.AddAchievement(4002, "task_master")
 	p.Achievements.AddAchievement(4003, "collector_100")
+	p.Achievements.AddAchievement(4004, "fully_equipped")
 
 	return p
 }

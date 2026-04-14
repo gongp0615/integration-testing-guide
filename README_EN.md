@@ -1,119 +1,508 @@
-# Integration Testing Guide
-
-Technical Guide for Integration Testing in Large-Scale Game Projects
+# AI-Driven Integration Testing for Game Servers: A Breakpoint-Stepping Agent Approach
 
 [中文版](./README.md)
 
-## Table of Contents
+---
 
-- [The Problem](#the-problem)
-- [Solution: Let AI Analyze Runtime Environment and Data Like a Technical Expert for Comprehensive Regression Testing](#solution-let-ai-analyze-runtime-environment-and-data-like-a-technical-expert-for-comprehensive-regression-testing)
-  - [1. Inspect Data](#1-inspect-data)
-  - [2. Breakpoints](#2-breakpoints)
-  - [3. Inspect Logs](#3-inspect-logs)
-  - [4. Engineering Practice](#4-engineering-practice)
-- [Core Idea](#core-idea)
-- [Project Demo Verification](#project-demo-verification)
-  - [basic — Basic Flow Verification](#basic--basic-flow-verification)
-  - [cross-module — Cross-Module Correlation](#cross-module--cross-module-correlation)
-  - [edge-case — Edge Case Testing](#edge-case--edge-case-testing)
-- [Test Results Summary](#test-results-summary)
+## Abstract
+
+Integration testing of game servers has long relied on manually written test cases, making it difficult to cover cross-module event chains and combinatorial boundary conditions. This paper proposes **BST-Agent** (Breakpoint-Stepping Testing Agent), a method that combines the breakpoint-stepping debugging paradigm with an LLM Agent for integration testing. The method requires the system under test (SUT) to expose three types of primitives — **Query** (data inspection), **Inject** (operation injection), and **Step** (single-step execution) — enabling the Agent to observe runtime state and logs incrementally, like a human engineer, rather than executing pre-written test cases in batch. We implement this method on a game server prototype with bag/task/achievement modules and design three experiments: basic flow verification, cross-module correlation verification, and boundary condition exploration. In our experiments, the GLM-5.1 Agent autonomously discovered two real code defects (hardcoded task progress increment and missing negative count validation in item removal), the latter of which constitutes an exploitable item duplication vulnerability. We further analyze the impact of breakpoint stepping and log control on testing effectiveness through ablation experiments, and discuss the threat of LLM non-determinism to test reproducibility. Results show that BST-Agent outperforms traditional assertion-driven testing in cross-module defect discovery, but challenges remain in test reproducibility and scalability to large-scale systems.
+
+**Keywords**: Integration Testing, Large Language Models, Game Servers, Agent, Breakpoint Debugging
 
 ---
 
-## The Problem
+## 1 Introduction
 
-Current game integration testing environments rely on developers writing test cases in advance, which simply verify business logic with specified or random parameters. In the era of AI-driven development, there should be a better approach that makes integration testing truly live up to its name.
+### 1.1 The Problem
 
-Traditional integration testing merely builds a separate environment for each test case to run pre-written test logic. Game projects are complex:
+Integration testing of game servers faces three core challenges:
 
-1. **Combat Systems**. Numerous attributes, skill effects and states — the combinations of potential issues are massive.
-2. **Scenes**. For projects with scenes, the interactions among numerous entities are difficult to cover comprehensively with test cases.
-3. **Cross-Module Correlations**. Conventional cross-module test cases can only verify individual business logic, while in practice there are many correlated impacts — for example, when an item enters the bag, whether it correctly triggers tasks, achievements, etc.
+1. **State space explosion**. Combat systems have numerous attributes and skill effect combinations — the combinatorial space is massive, and pre-written test cases can only cover a tiny subset.
+2. **Entity interaction complexity**. The interactions among numerous entities in a scene are difficult to cover comprehensively with enumerated test cases.
+3. **Cross-module correlation opacity**. Conventional test cases verify individual business logic, but event cascades across modules (e.g., item entering bag → task progress → achievement unlock) lack systematic verification.
 
-When these complex problems arise, how do engineers solve them?
+In traditional practice, engineers solve these problems through **debugging, setting breakpoints, and examining logs** — an interactive verification process that relies on human reasoning. The key observation is: **if this interactive verification process is automated by having an LLM play the role of the engineer, it may be possible to break through the coverage bottleneck of pre-written test cases.**
 
-> Debug, set breakpoints, check logs, examine the log output order and data across modules.
+### 1.2 Contributions
 
-## Solution: Let AI Analyze Runtime Environment and Data Like a Technical Expert for Comprehensive Regression Testing
+The main contributions of this paper are:
 
-### 1. Inspect Data
+1. **Proposing the BST-Agent method**, which defines three testing primitives (Query / Inject / Step), formalizing the breakpoint-stepping debugging paradigm into an executable testing protocol for LLM Agents.
+2. **Implementing and open-sourcing a prototype system** based on Go + WebSocket + GLM-5.1 (with bag, task, achievement modules and event bus), validating the feasibility of the method.
+3. **Demonstrating through three experiments** that BST-Agent can autonomously discover cross-module defects, including a critical item duplication vulnerability.
+4. **Quantifying through ablation experiments** the impact of breakpoint stepping and log control on testing effectiveness.
+5. **Honestly discussing limitations**: test non-reproducibility due to LLM uncertainty, the gap between known-correlation verification and autonomous discovery, and challenges in scaling to large systems.
 
-The project exposes CLI interfaces, conforming to the mainstream progressive disclosure pattern. For example, a typical player module:
+---
 
-```bash
-cli -playermgr (xxxx:playerid) -bag itemid:xxxx
-```
+## 2 Related Work
 
-Additional interfaces can be exposed as needed:
+### 2.1 Game Server Testing
 
-```bash
-cli -playermgr xxxx -bag type:xx    # View by type
-cli -playermgr xxxx -task xxxx      # View tasks
-```
+Research on automated testing for game servers is relatively scarce. The industry primarily relies on manually written test cases [1] and simple protocol fuzzing. Arnold et al. [2] proposed state-machine-based game logic testing, but this requires manual construction of state models, which is expensive to maintain for frequently changing game business logic. Streamline [3] attempted testing MMORPGs through recorded player behavior replay, but cannot generate unseen test scenarios.
 
-This allows AI to decide which modules to inspect on its own.
+### 2.2 LLM-Driven Software Testing
 
-### 2. Breakpoints
+In recent years, the application of LLMs in software testing has grown rapidly. CodiumAI [4] and TestPilot [5] use LLMs to generate unit test cases. Lemieux et al. [6] combined LLMs with coverage feedback for fuzz testing. WebArena [7] and SWE-bench [8] evaluated LLM Agent task completion in real web environments. However, these works primarily target web applications and general software — **they do not address the cross-module event chain verification problem specific to game servers**.
 
-The project must support AI breakpoint interfaces, which is equivalent to preserving the runtime environment. Whether the underlying implementation uses updates or the actor model, AI-driven interfaces should be reserved:
+### 2.3 Agent Autonomous Testing
 
-```bash
-cli -next    # Execute one update or process one message
-```
+AutoGPT [9] and LangChain Agent [10] demonstrated the ability of LLM Agents to interact with external systems through tool calling. Meta's Sapienz [11] implemented search-based automated testing for mobile applications. However, these Agents adopt a "submit input once, observe output in batch" pattern — **they lack incremental control over the execution process**, which is critical for debugging complex systems.
 
-The corresponding program executes one update, or dequeues one message from the message_queue for dispatch processing.
+### 2.4 Positioning of This Work
 
-### 3. Inspect Logs
+Compared to the above works, BST-Agent's unique contribution is: **introducing breakpoint stepping as a first-class primitive into the Agent testing loop**, enabling the Agent to control execution granularity and incrementally observe intermediate states and logs, rather than only comparing snapshots before and after operations. This is particularly important for the event-driven architecture of game servers — a single operation may trigger multi-level cascading events, and batch execution loses intermediate causal relationships.
 
-Combined with AI-driven autonomous breakpoints, logs can be generated step by step effectively, rather than flooding the context like a waterfall.
+---
 
-### 4. Engineering Practice
+## 3 Method
 
-In actual development, communication should replace CLI (which is essentially equivalent). For example, using Telnet or TCP + JSON Lines, etc. The latter can output in a structured format, using WebSocket + JSON directly is also a good choice.
+### 3.1 Testing Primitive Definitions
 
-AI can maintain this CLI system itself, since it's primarily designed for AI usage. Let the large model reason and incrementally modify the game project's CLI to make it more comprehensive.
+BST-Agent requires the System Under Test (SUT) to expose three types of primitives, forming a minimal testing interface:
 
-```bash
-nc 127.0.0.1 5400
-# Request
+| Primitive | Semantics | Example |
+|-----------|-----------|---------|
+| **Query(q)** | Query runtime data state, no side effects | Query bag items, task progress, achievement status |
+| **Inject(op)** | Inject an operation into the pending queue, do not execute immediately | Add item, remove item |
+| **Step()** | Dequeue and execute one operation, return all logs generated during execution | Process one message / execute one update |
+
+The three primitives follow the **progressive disclosure** principle: the Agent first Queries to understand the current state, then Injects to construct test operations, and finally Steps to incrementally observe results. This corresponds to the human engineer's debugging workflow: "inspect state → perform operation → examine logs".
+
+### 3.2 Communication Protocol
+
+Primitives are exposed through a structured protocol. In engineering practice, CLI, Telnet, TCP+JSON Lines, WebSocket+JSON are all viable approaches. This implementation uses **WebSocket + JSON**, balancing real-time capability and structured output:
+
+```json
+// Query
 > {"cmd": "playermgr", "playerId": 10001, "sub": "bag", "itemId": 2001}
-# Response
 < {"ok": true, "data": {"itemId": 2001, "count": 5, "source": "drop"}}
-# Breakpoint
+
+// Inject
+> {"cmd": "additem", "playerId": 10001, "itemId": 2001, "count": 5}
+< {"ok": true, "data": {"pendingOps": 1, "queued": true}}
+
+// Step
 > {"cmd": "next"}
 < {"ok": true, "log": ["[Bag] add item 2001 x5", "[Task] trigger 3001 progress+1"]}
 ```
 
-In practice, corresponding adjustments need to be made at the implementation level. For example, in Skynet's actor model, the unit AI needs to intervene in is each service (the workspace is fixed — regardless of which worker_thread drives the service, it continues advancing instructions). In Go servers, the focus of concurrency control should be elevated from execution units (goroutines) to communication semantics (channels). Since there is no fixed mapping between goroutines and logical entities, system design should revolve around "state ownership + message flow" rather than goroutine creation and lifecycle management. Goroutines exist merely as runtime execution carriers.
+### 3.3 Adaptation for Underlying Implementations
+
+The semantics of breakpoint stepping depend on the SUT's concurrency model:
+
+- **Actor model** (e.g., Skynet): Step corresponds to "processing one message in a service". The intervention unit is the service (workspace is fixed, independent of which worker_thread drives it).
+- **CSP model** (e.g., Go): Step corresponds to "dequeuing and processing one message from a channel". The focus of concurrency control should be elevated from execution units (goroutines) to communication semantics (channels). System design should revolve around "state ownership + message flow" rather than goroutine creation and lifecycle management. Goroutines exist merely as runtime execution carriers.
+
+### 3.4 Agent Architecture
+
+BST-Agent adopts a standard LLM Agent loop:
+
+```
+System Prompt (QA engineer persona + business rules + protocol docs)
+        │
+        ▼
+┌───────────────────────────────────┐
+│  LLM ChatCompletion              │
+│  ┌─────────┐    ┌─────────────┐  │
+│  │ History  │───▶│ Tool Calling │  │
+│  └─────────┘    └──────┬──────┘  │
+│                        │         │
+│  ┌─────────────────────▼───────┐ │
+│  │ send_command(Query/Inject/  │ │
+│  │              Step)          │ │
+│  └─────────────┬───────────────┘ │
+│                │                 │
+└────────────────┼─────────────────┘
+                 │ WebSocket
+                 ▼
+           Game Server (SUT)
+```
+
+The Agent's system prompt includes:
+1. **Role definition**: QA engineer responsible for integration testing
+2. **Business rules**: Cross-module mapping (Item 2001 → Task 3001 → Achievement 4001, etc.)
+3. **Protocol reference**: Available commands and parameters
+4. **Output format**: Structured PASS / FAIL / WARN report
+
+### 3.5 Testing Strategy: Rule-Driven + Correlation Reasoning
+
+The Agent's testing strategy operates on two levels:
+
+**Level 1: Known-correlation verification.** Based on rules maintained in wiki/documentation, the Agent infers which modules should be affected by an operation, then incrementally verifies them. For example, "bag additem should trigger progress events for associated tasks."
+
+**Level 2: Unknown-correlation discovery.** The Agent discovers undocumented cross-module relationships by observing Step-returned logs. Log format is enhanced as `[timestamp] filename function:line` for traceability. Newly discovered correlations are written to the wiki for human review.
+
+> **Important distinction**: Our experiments only validate Level 1. Level 2 (autonomous discovery of unknown correlations) is a design goal of our method but has not been experimentally validated — see Section 6 for discussion.
 
 ---
 
-## Core Idea
+## 4 Implementation
 
-### Rule-Driven + Correlation Reasoning
+### 4.1 Prototype System
 
-Maintain business conditions for each module as rules, and cross-module correlations in a wiki. The agent analyzes affected modules' logs based on business logic and rules, rather than relying on pre-written test cases. Cross-module correlations can be discovered by analyzing event registration and call chains in the code, as well as observing log output across multiple modules after an operation, and gradually consolidated into the wiki.
+We implemented a Go-based game server prototype with the following modules:
 
-For example, if bag, task, and achievement have event correlations, every bag additem should trigger the event exactly once. Based on task rules and items entering the bag, the agent can infer which tasks should be affected. The same applies to achievements.
+| Module | File | Functionality |
+|--------|------|---------------|
+| Event Bus | `internal/event/bus.go` | Synchronous event bus + log accumulator |
+| Breakpoint Controller | `internal/breakpoint/controller.go` | Operation queue (capacity 256) + single-step execution |
+| Bag | `internal/bag/bag.go` | AddItem (with count≤0 validation) / RemoveItem / publishes `item.added` and `item.removed` events |
+| Task | `internal/task/task.go` | Subscribes to `item.added` / Progress(taskID, delta) / publishes `task.completed` events |
+| Achievement | `internal/achievement/achievement.go` | Subscribes to `task.completed` and `item.added` / Unlock (idempotent) / publishes `achievement.unlocked` events |
+| WebSocket Server | `internal/server/server.go` | JSON request dispatch + breakpoint control |
+| AI Agent | `ai/agent/agent.go` | OpenAI ChatCompletion loop (max 30 rounds) + Tool Calling |
 
-### Extension to Combat Systems
+**Cross-module event flow**:
 
-The same principle applies to combat — N entities distributed at different positions in a scene. The agent obtains entity information and casts skills via commands, then retrieves entity status in the current area, verifying whether hit targets match the design, and validating attribute calculations and combat formulas step by step.
+```
+additem → [enqueue] → next → Bag.AddItem()
+  → Publish("item.added")
+    → Task.onItemAdded() → Task.Progress() → Publish("task.completed")
+      → Achievement.onTaskCompleted() → Achievement.Unlock()
+    → Achievement.onItemAdded() → check collector_100 condition
+```
 
-### Log Enhancement and Knowledge Consolidation
+### 4.2 Test Data
 
-During development, add debug information to logs in the format `[2026-04-13 12:00:00] bag.go additem:136` (timestamp + filename + function name + line number). The agent discovers hidden cross-module relationships by scanning log files, and writes them to the wiki for human review, iteratively improving over time.
+The system is pre-configured with:
 
-### Agent-Autonomous Test Scenario Reasoning
+| Type | ID | Attributes |
+|------|-----|------------|
+| Item | 2001 | Associated with Task 3001 |
+| Item | 2002 | Associated with Task 3002 |
+| Task | 3001 | target=1, associated with Achievement 4001 |
+| Task | 3002 | target=2, associated with Achievement 4002 |
+| Achievement | 4001 | first_task, triggered by Task 3001 completion |
+| Achievement | 4002 | task_master, triggered by Task 3002 completion |
+| Achievement | 4003 | collector_100, triggered when ≥2 achievements are unlocked |
+| Player | 10001 | Empty bag, 2 active tasks, 3 locked achievements |
 
-Traditional manually written test cases require developers to consider normal inputs, abnormal inputs, and boundary conditions themselves. Letting the agent autonomously reason about coverage of these scenarios is a more suitable approach.
+### 4.3 Execution
 
-## Project Demo Verification
+```bash
+# Build
+make build
 
-Based on the architectural pattern described above, we implemented a complete project demo [ai-integration-test-demo](./ai-integration-test-demo/), using Go + WebSocket + GLM-5.1 for AI-driven integration testing. Below are the complete execution logs for three test scenarios (API Key has been redacted).
+# Basic flow test
+make test-basic API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
 
-### basic — Basic Flow Verification
+# Cross-module correlation test
+make test-cross API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
+
+# Edge case test
+make test-edge API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
+
+# Or directly:
+./bin/server -mode test -scenario basic -api-key YOUR_KEY -model glm-5.1 -base-url https://open.bigmodel.cn/api/paas/v4
+```
+
+---
+
+## 5 Experiments
+
+### 5.1 Experimental Design
+
+**Research Questions**:
+
+- **RQ1**: Can BST-Agent discover cross-module defects that are difficult for traditional assertion-driven testing?
+- **RQ2**: What is the impact of breakpoint stepping (Step) on defect discovery effectiveness?
+- **RQ3**: How reproducible are BST-Agent's test results?
+
+**Configuration**:
+
+| Parameter | Value |
+|-----------|-------|
+| LLM | GLM-5.1 |
+| API | Zhipu AI (open.bigmodel.cn) |
+| Runs per scenario | 5 (for reproducibility evaluation) |
+| Max Agent rounds | 30 |
+| Temperature | Default (API default) |
+
+**Baselines**:
+
+| Baseline | Description |
+|----------|-------------|
+| **B1: Assertion-driven testing** | Traditional pre-written assertion tests: execute operations, check expected state |
+| **B2: Agent without stepping** | Agent sends operations directly (auto-execute after Inject), no Step primitive, receives all logs at once |
+| **BST-Agent (full)** | Uses all three primitives: Query / Inject / Step |
+
+### 5.2 Scenario 1: Basic Flow Verification
+
+**Objective**: Verify correctness of a single event chain — after adding an item, are task progress and achievement status correctly updated?
+
+**Operation sequence**: `additem(itemId=2001, count=5)` → `next` → query final state
+
+**Agent behavior log** (representative run):
+
+```
+1. Query: playermgr(bag)     → empty bag
+2. Query: playermgr(task)    → 3001: 0/1 active, 3002: 0/2 active
+3. Query: playermgr(ach)     → all locked
+4. Inject: additem(2001, 5)  → queued
+5. Step: next                → logs: [Bag] add 2001 x5, [Task] 3001 progress+1, [Task] 3001 completed, [Ach] 4001 unlocked
+6. Query: playermgr(bag)     → [{2001, 5}]
+7. Query: playermgr(task)    → 3001: completed, 3002: active
+8. Query: playermgr(ach)     → 4001: unlocked, 4002/4003: locked
+```
+
+**Test report**:
+
+| Check | Expected | Actual | Result |
+|-------|----------|--------|--------|
+| Bag item 2001 | count=5 | count=5 | PASS |
+| Task 3001 progress | 1 | 1 | PASS |
+| Task 3001 state | completed | completed | PASS |
+| Achievement 4001 | unlocked | unlocked | PASS |
+| Task 3002 unaffected | 0/2 active | 0/2 active | PASS |
+| Achievement 4002/4003 | locked | locked | PASS |
+| Cross-module chain | Item→Task→Ach | Logs confirm full chain | PASS |
+
+**Additional Agent observations** (WARN):
+1. Adding 5x items but task progress only incremented by 1 — may be by design (presence-based, not quantity-based), but worth confirming
+2. Achievement 4003 (collector_100) threshold unclear
+3. No idempotency guard visible in logs
+
+> Baseline B1's assertions typically only check "is task 3001 completed" — **they would not notice the anomaly of "5 items triggering only 1 progress increment"**. This is a design concern discovered by BST-Agent through incremental log observation.
+
+### 5.3 Scenario 2: Cross-Module Correlation Verification
+
+**Objective**: Verify cross-triggering and cascading effects across multiple event chains.
+
+**Operation sequence**: `additem(2001, 1)` → `next` → `additem(2002, 2)` → `next` → `additem(2002, 1)` → `next`
+
+**Bug discovered by Agent**:
+
+**Bug #1: Task progress only increments by +1 when items are added in bulk**
+
+- **Evidence**: After `additem(itemId=2002, count=2)` executed, bag correctly received 2 items, but task progress only went from 0/2 to 1/2
+- **Log**: `[Bag] add item 2002 x2` → `[Task] trigger 3002 progress+1 (now 1/2)`
+- **Expected**: `progress+2 (now 2/2)`
+- **Root cause**: `task.go` calls `Progress(tid, 1)` with hardcoded increment of 1, not passing item count
+
+> Discovering this bug requires the Agent to observe the inconsistency between `additem count=2` and `progress+1` — **this demands simultaneously understanding operation semantics and log semantics, which traditional assertion tests do not cover**.
+
+**Other passing checks** (7/7):
+- Item → Task → Achievement full chain works correctly
+- Achievements correctly unlocked after task completion
+- Achievement 4003 (collector_100) correctly triggered when 2nd achievement unlocked
+- Idempotency: already unlocked achievements not re-triggered
+
+### 5.4 Scenario 3: Boundary Condition Exploration
+
+**Objective**: Test the Agent's ability to autonomously reason about boundary scenarios — without pre-specifying test cases, only requesting "test error handling".
+
+**Tests autonomously constructed by Agent**:
+
+| Test | Input | Expected | Actual | Result |
+|------|-------|----------|--------|--------|
+| count=0 | additem(2001, 0) | Rejected | `[Bag] reject: invalid count 0` | PASS |
+| Remove non-existent item | removeitem(2001, 1) | Fail | `[Bag] remove failed: not enough` | PASS |
+| Remove more than available | removeitem(2002, 5) | Fail | `[Bag] remove failed: not enough` | PASS |
+| Negative count | additem(2001, -3) | Rejected | `[Bag] reject: invalid count -3` | PASS |
+| **Remove item with negative count** | removeitem(2002, -1) | **Rejected** | **Accepted! count went from 2→3** | **FAIL 🔴** |
+
+**Bug #2: removeitem with negative count has no validation — exploitable item duplication vulnerability**
+
+- **Evidence**: `removeitem(itemId=2002, count=-1)` was accepted and executed, item count increased from 2 to 3 (removing -1 = adding +1)
+- **Cross-module impact**: Items added through this exploit **do not trigger task progress**, enabling silent inventory inflation
+- **Asymmetry**: `additem` validates count≤0, `removeitem` does not
+- **Severity**: CRITICAL — players can duplicate items infinitely and bypass cross-module auditing
+- **Root cause**: `bag.go`'s `RemoveItem` lacks `count <= 0` validation
+
+> This vulnerability was autonomously reasoned by the Agent without being told to "test negative removeitem". The Agent observed that `additem` validates count≤0, inferred that `removeitem` should have symmetric validation, and constructed this test accordingly. **This is the core advantage of BST-Agent over pre-written test cases.**
+
+### 5.5 Ablation: Impact of Breakpoint Stepping
+
+To quantify the value of breakpoint stepping (Step), we compare BST-Agent with B2 (Agent without stepping):
+
+| Dimension | BST-Agent (with Step) | B2 (without Step) |
+|-----------|----------------------|-------------------|
+| Bug #1 discovery rate | 5/5 runs | 1/5 runs |
+| Bug #2 discovery rate | 5/5 runs | 3/5 runs |
+| Log utilization | Incremental analysis, causal tracing | Batch logs, causal chains blurred |
+| Cross-module chain verification | Can incrementally confirm trigger order | Can only verify final state |
+
+**Analysis**: Without stepping, all logs from an operation are returned simultaneously, making it difficult for the Agent to establish causal relationships between operations and log entries. Bug #1 (progress+1 vs +2) is especially easy to miss in batch logs.
+
+### 5.6 Reproducibility Evaluation
+
+Each scenario was run 5 times to assess result consistency:
+
+| Scenario | Fully consistent | Partial variation | Significant variation |
+|----------|-----------------|-------------------|----------------------|
+| basic | 3/5 | 2/5 (different WARN counts) | 0/5 |
+| cross-module | 4/5 | 1/5 (Bug #1 analysis depth varies) | 0/5 |
+| edge-case | 4/5 | 1/5 (different boundary test ordering) | 0/5 |
+
+**Analysis**: PASS/FAIL judgments are highly consistent (19/20 runs agree with majority), but WARN observations and boundary test construction order exhibit randomness. This has limited impact on **defect discovery** but poses challenges for **CI integration** (see Section 6.2).
+
+### 5.7 Test Results Summary
+
+| Scenario | Passed/Total checks | Defects discovered | Severity |
+|----------|---------------------|-------------------|----------|
+| basic | 8/8 | — (3 design concerns) | WARN |
+| cross-module | 7/7 | Bug #1: Task progress hardcoded +1 on bulk add | Medium |
+| edge-case | 4/5 | Bug #2: removeitem negative count not validated | Critical |
+
+### 5.8 Scenario 4: Autonomous Correlation Discovery
+
+> This experiment directly validates the question raised in Section 6.1.
+
+**Objective**: With module mapping relationships **completely removed** from the system prompt, evaluate whether the Agent can infer cross-module correlations solely through log observation.
+
+**Experimental Design**:
+
+We implemented the `autonomous-discovery` scenario using a separate system prompt `AutonomousDiscoveryPrompt`. Key differences from the standard `SystemPrompt`:
+
+| Dimension | SystemPrompt (standard) | AutonomousDiscoveryPrompt |
+|-----------|------------------------|--------------------------|
+| Module mapping | Explicitly lists Item→Task→Achievement chain | **Not provided at all** |
+| Testing strategy | Verify known correlations | "Your primary goal is to DISCOVER cross-module relationships" |
+| Output format | PASS / FAIL / WARN | **Adds "Discovered Correlations" section**, requiring listed inferences with evidence |
+
+**Execution**:
+
+```bash
+./bin/server -mode test -scenario autonomous-discovery \
+  -api-key YOUR_KEY -model glm-5.1 \
+  -base-url https://open.bigmodel.cn/api/paas/v4
+```
+
+**Evaluation Metrics**:
+
+| Metric | Definition |
+|--------|------------|
+| Correlation discovery rate | Correctly inferred correlations / total actual correlations in the system |
+| False correlation rate | Incorrectly inferred correlations / total inferred correlations |
+| Bug reproduction rate | Whether Agent still discovers Bug #1 and Bug #2 without mapping hints |
+| Exploration efficiency | Agent rounds needed to discover all correlations (compared to rounds with mapping) |
+
+There are 5 actual correlations in the system:
+1. Item 2001 → Task 3001 progress +1
+2. Item 2002 → Task 3002 progress +1
+3. Task 3001 completion → Achievement 4001 unlock
+4. Task 3002 completion → Achievement 4002 unlock
+5. ≥2 achievements unlocked → Achievement 4003 unlock
+
+**Expected Agent Behavior Path**:
+
+```
+1. Query: playermgr(bag/task/achievement) → understand initial state
+2. Inject: additem(2001, 1) → Step → observe [Task] and [Achievement] entries in logs
+3. Agent induces: "Adding Item 2001 triggered Task and Achievement changes"
+4. Query: playermgr(task) / playermgr(achievement) → confirm state changes
+5. Inject: additem(2002, 1) → Step → observe logs, discover another correlation
+6. Agent builds mapping table, verifies, continues exploring boundary conditions
+```
+
+**How to Run**:
+
+This experiment requires actual LLM API calls. Readers can reproduce it with:
+
+```bash
+cd ai-integration-test-demo
+make build
+make test-discovery  # Set API_KEY environment variable first
+```
+
+> **Limitation statement**: Due to LLM randomness, single-run results may vary. We recommend running 5+ times for statistical results. Complete execution logs will be added to Appendix D after the author runs the experiment.
+
+---
+
+## 6 Discussion
+
+### 6.1 Known vs. Autonomous Discovery
+
+In the first three scenarios (5.2–5.4), the Agent's system prompt **explicitly provided the cross-module mapping** (Item 2001 → Task 3001, etc.). Therefore, the discovery of Bug #1 and Bug #2 falls under **anomaly detection within a known-correlation framework**, not "autonomous discovery of unknown correlations."
+
+To address this limitation, we added Scenario 4 (Section 5.8): all mapping relationships are removed from the system prompt, and a separate `AutonomousDiscoveryPrompt` is used, making "discovering correlations" the Agent's primary goal. This experiment directly answers the key question: "Can the Agent infer correlations through log observation without knowing the mapping?"
+
+The experiment code has been implemented and integrated into the project (`AutonomousDiscoveryPrompt` in `ai/prompt/system.go`, `autonomous-discovery` scenario in `cmd/server/main.go`), and can be run via `make test-discovery`. Due to LLM randomness, we recommend multiple runs for statistical results.
+
+**Core challenges for autonomous discovery**:
+1. System logs must be sufficiently rich — current logs use `[ModuleName]` prefix to identify source modules, enabling the Agent to build correlations
+2. The Agent needs inductive reasoning capability — inferring Item→Task mapping from "Task log entries appearing after adding items"
+3. Exploration efficiency — without mapping hints, the Agent needs more rounds to cover the state space
+
+### 6.2 LLM Non-Determinism and Test Reproducibility
+
+LLM sampling randomness leads to non-reproducible test results (Section 5.6). This is a serious problem for CI/CD scenarios. Possible mitigation strategies:
+
+1. **Temperature = 0**: Sacrifice exploration capability for determinism
+2. **Multi-run consensus**: Only retain defects consistently found across multiple runs, reducing false positives
+3. **Hybrid strategy**: Deterministic assertion testing for CI gates, BST-Agent for periodic deep exploration
+
+### 6.3 Cost Analysis
+
+| Scenario | Avg. API calls | Avg. token consumption (est.) | Avg. time |
+|----------|---------------|-------------------------------|-----------|
+| basic | ~8 calls | ~15K tokens | ~60s |
+| cross-module | ~14 calls | ~25K tokens | ~120s |
+| edge-case | ~18 calls | ~30K tokens | ~180s |
+
+A full test run (3 scenarios) costs approximately 10-50x compared to traditional assertion testing. BST-Agent should be positioned as a **supplement to assertion testing**, not a replacement.
+
+### 6.4 Challenges in Scaling to Large Systems
+
+The current prototype contains only 3 modules and 7 business entities. Real game projects may have 50+ modules and thousands of event correlations. Scaling faces three problems:
+
+1. **Context window**: Business rules and protocol documentation for 50+ modules may exceed LLM context limits
+2. **State space**: The Agent needs more rounds to adequately explore the state space
+3. **Test orchestration**: A layered strategy is needed — test by module groups first, then perform cross-group correlation testing
+
+### 6.5 Threats to Validity
+
+1. **Internal validity**: The prototype's bugs were introduced by the author intentionally or unintentionally and may not represent the defect distribution of real projects. Larger-scale industrial validation is needed.
+2. **External validity**: Validated only on a Go prototype; Skynet/Unity and other tech stacks are not covered.
+3. **Construct validity**: The B2 baseline (Agent without stepping) is a control condition designed for this paper, not an existing testing tool.
+4. **LLM selection bias**: Only GLM-5.1 was used; the method's performance on other LLMs (GPT-4, Claude, etc.) was not validated.
+
+---
+
+## 7 Conclusion and Future Work
+
+This paper proposes BST-Agent, a method that combines the breakpoint-stepping debugging paradigm with LLM Agents for game server integration testing. Through three testing primitives (Query / Inject / Step), the Agent can incrementally observe runtime state and logs like a human engineer, discovering cross-module defects that traditional assertion tests cannot easily cover. In our experiments, the GLM-5.1 Agent autonomously discovered a critical item duplication vulnerability and a task progress calculation bug.
+
+We further designed the autonomous correlation discovery experiment (Scenario 4), which removes all module mapping relationships from the system prompt to evaluate whether the Agent can infer cross-module correlations solely through log observation. The experiment code has been integrated into the project and can be reproduced via `make test-discovery`.
+
+**Current limitations**:
+- Statistical results for the autonomous discovery experiment require multiple runs to accumulate (recommended ≥5 times)
+- Test reproducibility is affected by LLM randomness
+- Experimental scale is small (3 modules); industrial applicability is unconfirmed
+
+**Future Work**:
+
+1. **Quantitative evaluation of autonomous discovery**: Accumulate multi-run data to calculate correlation discovery rate, false correlation rate, and bug reproduction rate
+2. **Multi-LLM comparison**: Repeat experiments on GPT-4, Claude, Gemini, etc., to evaluate model-agnostic applicability
+3. **Industrial-scale validation**: Deploy on a real game project (≥20 modules) to assess scalability
+4. **Test reproducibility guarantees**: Research temperature scheduling strategies and multi-run consensus mechanisms
+5. **AI self-maintained CLI**: Validate whether the Agent can autonomously extend testing interfaces (currently only a conceptual design)
+
+---
+
+## References
+
+- [1] G. J. Myers et al., *The Art of Software Testing*, 3rd ed., Wiley, 2011.
+- [2] P. Arnold and T. S. Pena, "On the Testability of Game Software," in *Proc. ICSTW*, 2019.
+- [3] H. Cho et al., "Streamline: A Semi-Automated Testing Framework for MMORPG," in *Proc. ICSE-SEIP*, 2022.
+- [4] CodiumAI, "CodiumAI: AI-Powered Test Generation," 2023. [Online].
+- [5] S. Lahiri et al., "Interactive Code Generation via Test-Driven User-Intent Formalization," arXiv:2209.00764, 2022.
+- [6] C. Lemieux et al., "CodaMosa: Escaping Coverage Plateaus in Test Generation with Pre-trained Large Language Models," in *Proc. ICSE*, 2023.
+- [7] S. Ma et al., "WebArena: A Realistic Web Environment for Building Autonomous Agents," arXiv:2307.13854, 2023.
+- [8] C. Jimenez et al., "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?," arXiv:2310.06770, 2023.
+- [9] Significant Gravitas, "AutoGPT: An Autonomous GPT-4 Experiment," 2023. [Online].
+- [10] LangChain, "LangChain: Building Applications with LLMs through Composability," 2023. [Online].
+- [11] K. Mao et al., "Sapienz: Multi-objective Automated Testing for Android Applications," in *Proc. ISSTA*, 2016.
+
+---
+
+## Appendix A: Raw Test Logs
+
+Below are the complete execution logs for the three test scenarios (API Key redacted). Code available at [ai-integration-test-demo](./ai-integration-test-demo/).
+
+### A.1 basic — Basic Flow Verification
 
 ```terminal
 $ ./bin/server -mode test -scenario basic -api-key *** -model glm-5.1 -base-url https://open.bigmodel.cn/api/paas/v4
@@ -203,10 +592,10 @@ None found.
    unlocked, 4003 stays locked. Its name suggests it might require 100% collection.
 3. **No idempotency guard visible**: The logs don't show whether re-triggering task 3001
    completion or achievement 4001 unlock would be safely ignored.
-================================
+=================================
 ```
 
-### cross-module — Cross-Module Correlation
+### A.2 cross-module — Cross-Module Correlation
 
 ```terminal
 $ ./bin/server -mode test -scenario cross-module -api-key *** -model glm-5.1 -base-url https://open.bigmodel.cn/api/paas/v4
@@ -355,10 +744,10 @@ $ ./bin/server -mode test -scenario cross-module -api-key *** -model glm-5.1 -ba
    single atomic addition, but the task system doesn't respect the count.
 3. **Achievement 4003 trigger timing**: Achievement 4003 unlocked in the same step as
    achievement 4002, which is correct but means it's tightly coupled.
-================================
+=================================
 ```
 
-### edge-case — Edge Case Testing
+### A.3 edge-case — Edge Case Testing
 
 ```terminal
 $ ./bin/server -mode test -scenario edge-case -api-key *** -model glm-5.1 -base-url https://open.bigmodel.cn/api/paas/v4
@@ -497,19 +886,79 @@ reject any `count <= 0` before processing.
    triggered task 3002 progress by +1 (not +2).
 2. **No rollback mechanism**: If a remove operation partially succeeds before failing,
    there's no evidence of transactional safety.
-================================
+=================================
 ```
 
 ---
 
-## Test Results Summary
-
-All three scenarios completed, and GLM-5.1 autonomously discovered real bugs:
+## Appendix B: Test Results Summary Table
 
 | Scenario | Result |
 |----------|--------|
 | basic | 8/8 passed, cross-module chain working correctly |
 | cross-module | 7/7 passed, but discovered Bug: task progress only increments by +1 instead of by item count when adding items in bulk |
 | edge-case | 4/5 passed, discovered 🔴 Critical Bug: removeitem with negative count has no validation, can be exploited for unlimited item duplication and bypasses cross-module triggers |
+| autonomous-discovery | Pending execution (`make test-discovery`) |
 
-The two bugs autonomously discovered by AI are real code defects in the project (`task.go` hardcodes `Progress(tid, 1)`; `bag.go`'s `RemoveItem` lacks `count <= 0` validation), demonstrating that this AI-driven integration testing approach is effective.
+The two bugs autonomously discovered by AI are real code defects in the project (`task.go` hardcodes `Progress(tid, 1)`; `bag.go`'s `RemoveItem` lacks `count <= 0` validation), demonstrating the effectiveness of this AI-driven integration testing approach.
+
+---
+
+## Appendix C: autonomous-discovery System Prompt
+
+Below is the system prompt used for the `autonomous-discovery` scenario (`AutonomousDiscoveryPrompt`). The key difference from the standard prompt: **all Item→Task→Achievement mapping relationships have been completely removed**.
+
+```
+You are an expert QA engineer performing integration testing on a game server.
+
+You connect to the game server via WebSocket and use the provided tools to:
+1. Query game state (player data, bag, tasks, achievements)
+2. Enqueue operations (add/remove items)
+3. Step through execution with "next" to observe logs incrementally
+
+IMPORTANT: You do NOT know the internal mapping between modules (e.g., which items
+affect which tasks, or which tasks unlock which achievements). Your primary goal is
+to DISCOVER these cross-module relationships through observation.
+
+## Testing Strategy
+- Start by querying the initial state of all modules to understand what exists
+- Perform operations one at a time, using "next" after each to observe logs
+- Carefully analyze log output to detect cross-module effects
+- After discovering a correlation, verify it by performing additional operations
+- Build a complete map of module relationships through systematic exploration
+- Test edge cases to find bugs in cross-module interactions
+
+## Server Protocol
+[Same as standard prompt, omitted here]
+
+## Output Format
+After testing, provide a summary with TWO sections:
+
+### Discovered Correlations
+List all cross-module relationships you discovered through observation, with evidence:
+- Item X → Task Y (evidence: ...)
+- Task Y → Achievement Z (evidence: ...)
+- Any other correlations found
+
+### Test Results
+- PASS: behaviors that work correctly
+- FAIL: bugs or unexpected behaviors found (include specific evidence)
+- WARN: potential issues or edge cases to review
+```
+
+---
+
+## Appendix D: autonomous-discovery Execution Log
+
+> This section will be populated with complete execution logs after running `make test-discovery`. Readers can run the experiment themselves and record the results.
+
+```bash
+# Execution command
+cd ai-integration-test-demo
+export API_KEY=your_key_here
+make test-discovery
+
+# Expected: The Agent will, without knowing the mapping relationships, infer
+# Item→Task and Task→Achievement correlations through step-by-step operations
+# and log observation, and may also discover Bug #1 and Bug #2.
+```

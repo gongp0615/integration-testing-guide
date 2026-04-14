@@ -1,33 +1,54 @@
-# AI-Driven Integration Testing Demo
+# BST-Agent Demo
 
-基于 [Integration Testing Guide](../README.md) 架构模式的项目示例，用 Go + WebSocket + OpenAI 实现游戏服务器的 AI 驱动集成测试。
+基于 [Integration Testing Guide](../README.md) 的断点步进自主集成测试原型，用 Go + WebSocket + LLM 实现。
 
 ## 架构
 
 ```
-┌──────────────┐   WebSocket+JSON   ┌──────────────────┐
-│   AI Agent   │ ◄───────────────► │   Game Server    │
-│  (OpenAI)    │                   │   (Go)           │
-│              │  cmd / next / log │                  │
-└──────────────┘                   └──────────────────┘
+┌──────────────────────────────────────────────────────┐
+│ 启动时：代码分析预处理（Go AST，毫秒级）              │
+│                                                      │
+│  codeanalyzer → Code Summary (结构体/函数/事件流映射) │
+│         │                                            │
+│         ▼ 注入 System Prompt                         │
+│  ┌─────────────────────────────────────────────────┐ │
+│  │        BST-Agent (LLM)                          │ │
+│  │                                                 │ │
+│  │  System Prompt = 角色定义 + 协议 + Code Summary  │ │
+│  │              [+ 需求文档 (Level 1+)]             │ │
+│  │              [+ 人工规则 (Level 2)]              │ │
+│  │                    │                             │ │
+│  │              ┌─────▼──────┐                      │ │
+│  │              │ send_command│ ← 唯一运行时工具     │ │
+│  │              │ (Query/    │                      │ │
+│  │              │  Inject/   │                      │ │
+│  │              │  Step)     │                      │ │
+│  │              └─────┬──────┘                      │ │
+│  └────────────────────┼────────────────────────────┘ │
+└───────────────────────┼──────────────────────────────┘
+                        │ WebSocket+JSON
+                  ┌─────▼──────────┐
+                  │  Game Server   │
+                  │  (6 modules)   │
+                  │  Event Bus     │
+                    │  Event Bus     │
+                    │  Breakpoint    │
+                    └────────────────┘
 ```
 
-### 核心概念
-
-| 概念 | 实现 |
-|------|------|
-| **看数据** | `playermgr` 命令查询背包/任务/成就状态 |
-| **断点** | `next` 命令单步执行队列中的操作，返回增量日志 |
-| **看日志** | 每次 `next` 返回 `log` 数组，避免日志瀑布 |
-| **跨模块关联** | 事件总线驱动：物品添加 → 任务进度 → 成就解锁 |
-| **AI 自主推理** | OpenAI Function Calling，AI 决定查什么、推几步 |
-
-### 模块间关联
+### 模块间关联（事件总线解耦）
 
 ```
-添加物品 (2001) ──→ 任务进度 (3001) ──→ 成就解锁 (4001: first_task)
-添加物品 (2002) ──→ 任务进度 (3002) ──→ 成就解锁 (4002: task_master)
-2+ 成就解锁 ──────────────────────────→ 成就解锁 (4003: collector_100)
+additem(2001) → Bag → Publish("item.added")
+  ├── Task.onItemAdded() → Progress(3001, 1) → Publish("task.completed")
+  │     └── Achievement.onTaskCompleted() → Unlock(4001) → Publish("achievement.unlocked")
+  │           └── Mail.onAchievementUnlocked() → SendMail()
+  ├── Achievement.onItemAdded() → 检查 collector_100 条件
+  └── Equipment.onItemAdded() → 检查是否可装备 → Publish("equip.success")
+        └── Achievement.onEquipSuccess() → 检查 fully_equipped 条件
+
+checkin(day=1) → SignIn → Publish("signin.claimed")
+  └── Mail.onSignInClaimed() → SendRewardMail()
 ```
 
 ## 快速开始
@@ -36,77 +57,86 @@
 # 构建
 make build
 
-# 启动服务器（手动模式，可用 wscat 等工具连接）
-make run
+# 自主发现测试（双通道，Level 0 Zero Prompt）
+make test-discovery API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
 
-# AI 驱动测试
-export OPENAI_API_KEY=sk-xxx
-make test-basic      # 基础场景
-make test-cross      # 跨模块关联场景
-make test-edge       # 边界测试场景
+# 消融实验：仅代码通道
+make test-code-only API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
+
+# 消融实验：仅日志通道
+make test-log-only API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
+
+# 手动交互模式
+./bin/server -port 5400
+# 另一个终端: wscat -c ws://127.0.0.1:5400/ws
 ```
+
+## 六模块系统
+
+| 模块 | 功能 | 发布事件 | 订阅事件 |
+|------|------|----------|----------|
+| Bag | AddItem / RemoveItem | `item.added`, `item.removed` | — |
+| Task | Progress / Complete | `task.completed` | `item.added` |
+| Achievement | Unlock（幂等） | `achievement.unlocked` | `task.completed`, `item.added`, `equip.success` |
+| Equipment | Equip / Unequip | `equip.success`, `equip.unequipped` | `item.added` |
+| SignIn | CheckIn / ClaimReward | `signin.claimed` | — |
+| Mail | SendMail / ClaimAttachment | `mail.claimed` | `signin.claimed`, `achievement.unlocked` |
+
+### 预埋缺陷
+
+| Bug | 位置 | 描述 | 严重度 |
+|-----|------|------|--------|
+| #1 | `task.go` | Progress 增量硬编码为 1 | Medium |
+| #2 | `bag.go` | RemoveItem 缺少 count≤0 校验 | Critical |
+| #3 | `signin.go` | ClaimReward 可重复领取 | High |
 
 ## 协议
 
-通过 WebSocket 连接 `ws://127.0.0.1:5400/ws`，发送 JSON 请求：
-
 ```bash
-# 查看背包
+# 查询
 > {"cmd": "playermgr", "playerId": 10001, "sub": "bag"}
-< {"ok": true, "data": []}
+> {"cmd": "playermgr", "playerId": 10001, "sub": "task"}
+> {"cmd": "playermgr", "playerId": 10001, "sub": "achievement"}
+> {"cmd": "playermgr", "playerId": 10001, "sub": "equipment"}
+> {"cmd": "playermgr", "playerId": 10001, "sub": "signin"}
+> {"cmd": "playermgr", "playerId": 10001, "sub": "mail"}
 
-# 添加物品（入队列，不立即执行）
+# 操作（入队列）
 > {"cmd": "additem", "playerId": 10001, "itemId": 2001, "count": 5}
-< {"ok": true, "data": {"queued": true, "pendingOps": 1}}
+> {"cmd": "removeitem", "playerId": 10001, "itemId": 2001, "count": 3}
+> {"cmd": "checkin", "playerId": 10001, "day": 1}
+> {"cmd": "claimreward", "playerId": 10001, "day": 1}
+> {"cmd": "equip", "playerId": 10001, "slot": "weapon", "itemId": 3001}
+> {"cmd": "unequip", "playerId": 10001, "slot": "weapon"}
+> {"cmd": "claimmail", "playerId": 10001, "mailId": 1}
 
-# 单步执行，返回增量日志
+# 单步执行
 > {"cmd": "next"}
-< {"ok": true, "log": ["[Bag] add item 2001 x5", "[Task] trigger 3001 progress+1 (now 1/1)", "[Task] task 3001 completed", "[Achievement] unlocked: first_task (id=4001)"]}
-
-# 查看任务状态
-> {"cmd": "playermgr", "playerId": 10001, "sub": "task", "taskId": 3001}
-< {"ok": true, "data": {"taskId": 3001, "target": 1, "progress": 1, "state": "completed"}}
+< {"ok": true, "log": ["[Bag] add item 2001 x5", "[Task] trigger 3001 progress+1 ..."]}
 ```
 
 ## 项目结构
 
 ```
-├── cmd/server/main.go          # 入口：server 模式 / test 模式
+├── cmd/server/main.go              # 入口：server / test 模式
 ├── internal/
-│   ├── server/server.go        # WebSocket 服务器 + 消息路由
-│   ├── breakpoint/controller.go # 断点控制器（next 推进）
-│   ├── player/manager.go       # 玩家管理器
-│   ├── bag/bag.go              # 背包系统
-│   ├── task/task.go            # 任务系统（订阅 item.added）
-│   ├── achievement/achievement.go # 成就系统（订阅 task.completed）
-│   └── event/bus.go            # 事件总线
+│   ├── server/server.go            # WebSocket 服务器 + 消息路由
+│   ├── breakpoint/controller.go    # 断点控制器（next 推进）
+│   ├── player/manager.go           # 玩家管理器（6 模块组合）
+│   ├── bag/bag.go                  # 背包模块
+│   ├── task/task.go                # 任务模块（订阅 item.added）
+│   ├── achievement/achievement.go  # 成就模块（订阅 task.completed + equip.success）
+│   ├── equipment/equipment.go      # 装备模块（订阅 item.added）
+│   ├── signin/signin.go            # 签到模块
+│   ├── mail/mail.go                # 邮件模块（订阅 signin.claimed + achievement.unlocked）
+│   └── event/bus.go               # 事件总线
 ├── ai/
-│   ├── agent/agent.go          # AI Agent（OpenAI Function Calling 循环）
-│   ├── tools/tools.go          # AI 可用工具定义
-│   ├── prompt/system.go        # System Prompt
-│   └── session/session.go      # WebSocket 会话封装
+│   ├── agent/agent.go              # Agent 循环（双通道调度）
+│   ├── tools/tools.go              # 工具定义（代码通道 + 运行时通道）
+│   ├── prompt/system.go            # 系统提示词（双通道 / 仅代码 / 仅日志，支持多等级 Prompt）
+│   └── session/session.go          # WebSocket 会话封装
+├── scripts/
+│   └── summarize_results.py        # 多次运行结果汇总
 ├── Makefile
 └── README.md
 ```
-
-## 测试场景
-
-### basic — 基础流程验证
-AI 查看初始状态 → 添加物品 → 单步执行 → 验证跨模块触发
-
-### cross-module — 跨模块关联
-验证完整的 物品→任务→成就 触发链，包括 collector_100 的条件解锁
-
-### edge-case — 边界测试
-AI 自主测试 count=0、负数、移除不存在的物品等边界情况
-
-## 设计说明
-
-### 断点控制器
-操作入队列后不立即执行，AI 通过 `next` 命令逐步推进。这等价于传统调试中的"单步执行"，让 AI 可以在每一步之后观察日志和状态变化。
-
-### 事件驱动
-所有模块间通信通过事件总线完成，不直接调用。背包添加物品发布 `item.added` 事件，任务系统订阅该事件并推进进度，完成后发布 `task.completed` 事件，成就系统订阅并解锁。
-
-### Go 并发模型
-按照文章建议，围绕"状态归属 + 消息流"设计，goroutine 仅作为运行时载体。断点控制器使用 channel 缓冲操作队列，`Next()` 从 channel 中取出一条操作执行。

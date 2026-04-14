@@ -14,15 +14,17 @@ const (
 )
 
 type Achievement struct {
-	AchID  int              `json:"achId"`
-	Name   string           `json:"name"`
-	State  AchievementState `json:"state"`
+	AchID int              `json:"achId"`
+	Name  string           `json:"name"`
+	State AchievementState `json:"state"`
 }
 
 type AchievementSystem struct {
-	playerID int
-	achs     map[int]*Achievement
-	bus      *event.Bus
+	playerID  int
+	achs      map[int]*Achievement
+	bus       *event.Bus
+	hasWeapon bool
+	hasArmor  bool
 }
 
 func New(playerID int, bus *event.Bus) *AchievementSystem {
@@ -33,6 +35,7 @@ func New(playerID int, bus *event.Bus) *AchievementSystem {
 	}
 	bus.Subscribe("task.completed", as.onTaskCompleted)
 	bus.Subscribe("item.added", as.onItemAdded)
+	bus.Subscribe("equip.success", as.onEquipSuccess)
 	return as
 }
 
@@ -70,6 +73,27 @@ func (as *AchievementSystem) onItemAdded(e event.Event) {
 		}
 		if totalItems >= 2 {
 			as.Unlock(collectorAchID)
+		}
+	}
+}
+
+func (as *AchievementSystem) onEquipSuccess(e event.Event) {
+	playerID, _ := e.Data["playerID"].(int)
+	if playerID != as.playerID {
+		return
+	}
+	slot, _ := e.Data["slot"].(string)
+	if slot == "weapon" {
+		as.hasWeapon = true
+	}
+	if slot == "armor" {
+		as.hasArmor = true
+	}
+
+	fullyEquippedAchID := 4004
+	if ach, exists := as.achs[fullyEquippedAchID]; exists && ach.State == AchLocked {
+		if as.hasWeapon && as.hasArmor {
+			as.Unlock(fullyEquippedAchID)
 		}
 	}
 }
