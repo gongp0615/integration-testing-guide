@@ -63,7 +63,7 @@ func (ts *TaskSystem) AddTask(taskID, target int) {
 
 func (ts *TaskSystem) Progress(taskID, delta int) {
 	t, ok := ts.tasks[taskID]
-	if !ok || t.State == StateCompleted {
+	if !ok {
 		return
 	}
 	t.Progress += delta
