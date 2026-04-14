@@ -72,16 +72,16 @@ func sendCommandTool(mode string) oai.Tool {
 			Type:        jsonschema.Number,
 			Description: "Player ID (required for most commands)",
 		},
+		"itemId":  {Type: jsonschema.Number, Description: "Item ID"},
+		"count":   {Type: jsonschema.Number, Description: "Item count"},
+		"taskId":  {Type: jsonschema.Number, Description: "Task ID"},
+		"achId":   {Type: jsonschema.Number, Description: "Achievement ID"},
+		"day":     {Type: jsonschema.Number, Description: "Sign-in day number 1-7"},
+		"mailId":  {Type: jsonschema.Number, Description: "Mail ID"},
+		"slot":    {Type: jsonschema.String, Description: "Equipment slot: weapon or armor"},
 	}
 	if hasStepMode(mode) {
 		props["sub"] = jsonschema.Definition{Type: jsonschema.String, Description: "Sub-module: bag, task, achievement, equipment, signin, mail"}
-		props["itemId"] = jsonschema.Definition{Type: jsonschema.Number, Description: "Item ID"}
-		props["count"] = jsonschema.Definition{Type: jsonschema.Number, Description: "Item count"}
-		props["taskId"] = jsonschema.Definition{Type: jsonschema.Number, Description: "Task ID"}
-		props["achId"] = jsonschema.Definition{Type: jsonschema.Number, Description: "Achievement ID"}
-		props["day"] = jsonschema.Definition{Type: jsonschema.Number, Description: "Sign-in day number 1-7"}
-		props["mailId"] = jsonschema.Definition{Type: jsonschema.Number, Description: "Mail ID"}
-		props["slot"] = jsonschema.Definition{Type: jsonschema.String, Description: "Equipment slot: weapon or armor"}
 	}
 	return oai.Tool{
 		Type: oai.ToolTypeFunction,

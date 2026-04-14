@@ -117,6 +117,12 @@ func main() {
 
 	log.Printf("game server started on :%d (mode=server)", *port)
 
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("server error: %v", err)
+		}
+	}()
+
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
 	<-sigCh
