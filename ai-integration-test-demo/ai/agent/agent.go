@@ -13,37 +13,65 @@ import (
 )
 
 type Agent struct {
-	client  *oai.Client
-	session *session.Session
-	model   string
+	client      *oai.Client
+	session     *session.Session
+	model       string
+	mode        string
+	codeSummary string
 }
 
-func New(apiKey, model, baseURL string, sess *session.Session) *Agent {
+func New(apiKey, model, baseURL string, sess *session.Session, mode string, codeSummary string) *Agent {
 	cfg := oai.DefaultConfig(apiKey)
 	if baseURL != "" {
 		cfg.BaseURL = baseURL
 	}
 	return &Agent{
-		client:  oai.NewClientWithConfig(cfg),
-		session: sess,
-		model:   model,
+		client:      oai.NewClientWithConfig(cfg),
+		session:     sess,
+		model:       model,
+		mode:        mode,
+		codeSummary: codeSummary,
 	}
 }
 
 func (a *Agent) Run(ctx context.Context, taskDesc string) (string, error) {
+	sysPrompt := prompt.BuildPrompt(a.mode, prompt.PromptOptions{
+		DocContent: a.codeSummary,
+	})
+
 	messages := []oai.ChatCompletionMessage{
-		{Role: oai.ChatMessageRoleSystem, Content: prompt.SystemPrompt},
+		{Role: oai.ChatMessageRoleSystem, Content: sysPrompt},
 		{Role: oai.ChatMessageRoleUser, Content: taskDesc},
 	}
 
-	toolDefs := tools.Definitions()
+	toolDefs := tools.Definitions(a.mode)
 
-	for i := 0; i < 30; i++ {
-		resp, err := a.client.CreateChatCompletion(ctx, oai.ChatCompletionRequest{
+	maxIter := 80
+	if a.mode == "code-only" {
+		maxIter = 15
+	}
+
+	warnAt := maxIter - 8
+	forcedAt := maxIter - 3
+
+	for i := 0; i < maxIter; i++ {
+		if i == warnAt {
+			messages = append(messages, oai.ChatCompletionMessage{
+				Role:    oai.ChatMessageRoleUser,
+				Content: "[SYSTEM] You are approaching the iteration limit. Start wrapping up now. Produce your final Correlation Map and Defect Report. Do NOT make more tool calls.",
+			})
+		}
+
+		req := oai.ChatCompletionRequest{
 			Model:    a.model,
 			Messages: messages,
-			Tools:    toolDefs,
-		})
+		}
+
+		if i < forcedAt && len(toolDefs) > 0 {
+			req.Tools = toolDefs
+		}
+
+		resp, err := a.client.CreateChatCompletion(ctx, req)
 		if err != nil {
 			return "", fmt.Errorf("openai api error: %w", err)
 		}
@@ -56,6 +84,14 @@ func (a *Agent) Run(ctx context.Context, taskDesc string) (string, error) {
 		}
 
 		if choice.FinishReason == oai.FinishReasonToolCalls {
+			if i >= forcedAt {
+				messages = append(messages, oai.ChatCompletionMessage{
+					Role:       oai.ChatMessageRoleTool,
+					Content:    "[SYSTEM] Iteration limit reached. You MUST produce your final report now without any more tool calls.",
+					ToolCallID: choice.Message.ToolCalls[0].ID,
+				})
+				continue
+			}
 			for _, tc := range choice.Message.ToolCalls {
 				result, err := a.handleToolCall(tc)
 				if err != nil {
@@ -77,6 +113,10 @@ func (a *Agent) Run(ctx context.Context, taskDesc string) (string, error) {
 }
 
 func (a *Agent) handleToolCall(tc oai.ToolCall) (string, error) {
+	if tc.Function.Name != "send_command" {
+		return "", fmt.Errorf("unknown tool: %s", tc.Function.Name)
+	}
+
 	var params tools.SendCommandParams
 	if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
 		return "", fmt.Errorf("invalid arguments: %w", err)
