@@ -89,9 +89,25 @@ In practice, corresponding adjustments need to be made at the implementation lev
 
 ---
 
-# Core Idea
+## Core Idea
 
-The examples below demonstrate that the approach is feasible. In daily development, define conditions for each module in rules, and maintain cross-module correlations in a wiki, allowing the agent to analyze affected modules' logs based on business logic and rules. For instance, if bag and task/achievement have event correlations, every bag additem should trigger the event exactly once. Based on task rules and items entering the bag, the agent can infer which tasks should be affected. The same applies to achievements. No combat examples are shown here, but the principle is the same — N entities distributed at different positions in a scene. During agent debugging, the server's internal self-driving stops and switches to agent-driven mode. The agent obtains entity IDs and skill usage via cmd, then retrieves basic information of entities in the current area via cmd, verifying whether hit targets match the design, and then checking attribute calculations and combat formulas — all of which can be verified step by step by the agent. Additionally, during development, debug information can be added to logs, such as `[2026-04-13 12:00:00] bag.go additem:136` — timestamp + filename + function name + line number. Let the agent frequently scan log files, for example using `grep -C 10 keyword` to discover relationships between business modules, though writing to the wiki ultimately requires human review for gradual improvement and updates. I believe this approach is also applicable to other industries.
+### Rule-Driven + Correlation Reasoning
+
+Maintain business conditions for each module as rules, and cross-module correlations in a wiki. The agent analyzes affected modules' logs based on business logic and rules, rather than relying on pre-written test cases. Cross-module correlations can be discovered by analyzing event registration and call chains in the code, as well as observing log output across multiple modules after an operation, and gradually consolidated into the wiki.
+
+For example, if bag, task, and achievement have event correlations, every bag additem should trigger the event exactly once. Based on task rules and items entering the bag, the agent can infer which tasks should be affected. The same applies to achievements.
+
+### Extension to Combat Systems
+
+The same principle applies to combat — N entities distributed at different positions in a scene. The agent obtains entity information and casts skills via commands, then retrieves entity status in the current area, verifying whether hit targets match the design, and validating attribute calculations and combat formulas step by step.
+
+### Log Enhancement and Knowledge Consolidation
+
+During development, add debug information to logs in the format `[2026-04-13 12:00:00] bag.go additem:136` (timestamp + filename + function name + line number). The agent discovers hidden cross-module relationships by scanning log files, and writes them to the wiki for human review, iteratively improving over time.
+
+### Agent-Autonomous Test Scenario Reasoning
+
+Traditional manually written test cases require developers to consider normal inputs, abnormal inputs, and boundary conditions themselves. Letting the agent autonomously reason about coverage of these scenarios is a more suitable approach.
 
 ## Project Demo Verification
 
