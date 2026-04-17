@@ -1,6 +1,6 @@
-# BST-Agent：基于命令树与步进思考的 Agent 驱动集成测试方法
+# 基于确定性状态机断点的游戏服务端 AI 驱动集成测试
 
-> **BST-Agent: Agent-Driven Integration Testing via Tree-Structured Command Space and Step-Wise Reasoning**
+> **AI-Driven Integration Testing for Game Servers via Deterministic State Machine Breakpoints**
 
 ---
 

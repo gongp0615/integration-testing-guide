@@ -1,4 +1,4 @@
-# BST-Agent: Agent-Driven Integration Testing via Tree-Structured Command Space and Step-Wise Reasoning
+# AI-Driven Integration Testing for Game Servers via Deterministic State Machine Breakpoints
 
 ---
 
