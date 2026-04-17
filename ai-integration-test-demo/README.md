@@ -1,6 +1,6 @@
-# DSMB-Agent Demo
+# AI-Driven Integration Testing for Game Servers — Demo
 
-这是 DSMB-Agent 的**可运行原型**，对应根目录论文主文档 [`../README.md`](../README.md) 中的实验载体。
+这是论文 *AI-Driven Integration Testing for Game Servers via Deterministic State Machine Breakpoints* 的**可运行原型**，对应根目录论文主文档 [`../README.md`](../README.md) 中的实验载体。
 
 当前原型已经具备：
 
