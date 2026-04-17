@@ -1,142 +1,187 @@
 # BST-Agent Demo
 
-基于 [Integration Testing Guide](../README.md) 的断点步进自主集成测试原型，用 Go + WebSocket + LLM 实现。
+这是 BST-Agent 的**可运行原型**，对应根目录论文主文档 [`../README.md`](../README.md) 中的实验载体。
 
-## 架构
+当前原型已经具备：
 
-```
-┌──────────────────────────────────────────────────────┐
-│ 启动时：代码分析预处理（Go AST，毫秒级）              │
-│                                                      │
-│  codeanalyzer → Code Summary (结构体/函数/事件流映射) │
-│         │                                            │
-│         ▼ 注入 System Prompt                         │
-│  ┌─────────────────────────────────────────────────┐ │
-│  │        BST-Agent (LLM)                          │ │
-│  │                                                 │ │
-│  │  System Prompt = 角色定义 + 协议 + Code Summary  │ │
-│  │              [+ 需求文档 (Level 1+)]             │ │
-│  │              [+ 人工规则 (Level 2)]              │ │
-│  │                    │                             │ │
-│  │              ┌─────▼──────┐                      │ │
-│  │              │ send_command│ ← 唯一运行时工具     │ │
-│  │              │ (Query/    │                      │ │
-│  │              │  Inject/   │                      │ │
-│  │              │  Step)     │                      │ │
-│  │              └─────┬──────┘                      │ │
-│  └────────────────────┼────────────────────────────┘ │
-└───────────────────────┼──────────────────────────────┘
-                        │ WebSocket+JSON
-                  ┌─────▼──────────┐
-                  │  Game Server   │
-                  │  (6 modules)   │
-                  │  Event Bus     │
-                    │  Event Bus     │
-                    │  Breakpoint    │
-                    └────────────────┘
-```
+- 六模块事件驱动游戏服务端
+- `next` / `batch` 执行控制
+- 代码理解工具（`read_file` / `search_code` / `update_knowledge`）
+- L2 基线场景
+- `register_cmd` 最小 MVP
+- L0 / L1 场景脚手架
 
-### 模块间关联（事件总线解耦）
+但要特别注意：
 
-```
-additem(2001) → Bag → Publish("item.added")
-  ├── Task.onItemAdded() → Progress(3001, 1) → Publish("task.completed")
-  │     └── Achievement.onTaskCompleted() → Unlock(4001) → Publish("achievement.unlocked")
-  │           └── Mail.onAchievementUnlocked() → SendMail()
-  ├── Achievement.onItemAdded() → 检查 collector_100 条件
-  └── Equipment.onItemAdded() → 检查是否可装备 → Publish("equip.success")
-        └── Achievement.onEquipSuccess() → 检查 fully_equipped 条件
+> 这并不意味着正式实验已经完成。当前环境仍缺少 `API_KEY`，因此真实的 L0 / L1 / L2 对比结果还没有跑出来。
 
-checkin(day=1) → SignIn → Publish("signin.claimed")
-  └── Mail.onSignInClaimed() → SendRewardMail()
-```
+---
 
-## 快速开始
+## 1. 当前原型包含什么
+
+### 业务模块
+
+- Bag
+- Task
+- Achievement
+- Equipment
+- SignIn
+- Mail
+
+### 支撑模块
+
+- Event Bus
+- Breakpoint Controller
+- WebSocket Server
+- AI Agent loop
+
+---
+
+## 2. 已实现能力
+
+### 运行时命令
+
+- `playermgr`
+- `additem`
+- `removeitem`
+- `checkin`
+- `claimreward`
+- `equip`
+- `unequip`
+- `claimmail`
+- `next`
+- `batch`
+- `help`
+
+### 新增的接口设计能力
+
+- `register_cmd`
+- `listcmd`
+
+`register_cmd` 当前是一个**白名单式最小 MVP**：
+
+它允许 Agent 注册具名测试命令，并把它们绑定到少量允许的原始业务动作上，例如：
+
+- `bag.AddItem`
+- `bag.RemoveItem`
+- `signin.CheckIn`
+- `signin.ClaimReward`
+- `equipment.Equip`
+- `equipment.Unequip`
+- `mail.ClaimAttachment`
+
+这样做的目的是让 Agent 能在**不改业务代码**的前提下，补出验证所需的测试入口。
+
+---
+
+## 3. 当前场景划分
+
+### 运行时 L2 基线
 
 ```bash
-# 构建
+make test-dual API_KEY=xxx
+make test-step-only API_KEY=xxx
+make test-code-batch API_KEY=xxx
+make test-batch-only API_KEY=xxx
+```
+
+### 分析基线
+
+```bash
+make test-code-only API_KEY=xxx
+```
+
+### L0 / L1 脚手架
+
+```bash
+make test-l0 API_KEY=xxx
+make test-l1 API_KEY=xxx
+```
+
+说明：
+
+- `test-l0` / `test-l1` 现在表示入口和运行模式已接入
+- 但正式结果仍依赖真实 LLM 运行
+- 当前环境若没有 `API_KEY`，这些场景无法产出真实实验数据
+
+---
+
+## 4. 快速开始
+
+### 构建
+
+```bash
 make build
-
-# 自主发现测试（双通道，Level 0 Zero Prompt）
-make test-discovery API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
-
-# 消融实验：仅代码通道
-make test-code-only API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
-
-# 消融实验：仅日志通道
-make test-log-only API_KEY=xxx MODEL=glm-5.1 BASE_URL=https://open.bigmodel.cn/api/paas/v4
-
-# 手动交互模式
-./bin/server -port 5400
-# 另一个终端: wscat -c ws://127.0.0.1:5400/ws
 ```
 
-## 六模块系统
-
-| 模块 | 功能 | 发布事件 | 订阅事件 |
-|------|------|----------|----------|
-| Bag | AddItem / RemoveItem | `item.added`, `item.removed` | — |
-| Task | Progress / Complete | `task.completed` | `item.added` |
-| Achievement | Unlock（幂等） | `achievement.unlocked` | `task.completed`, `item.added`, `equip.success` |
-| Equipment | Equip / Unequip | `equip.success`, `equip.unequipped` | `item.added` |
-| SignIn | CheckIn / ClaimReward | `signin.claimed` | — |
-| Mail | SendMail / ClaimAttachment | `mail.claimed` | `signin.claimed`, `achievement.unlocked` |
-
-### 预埋缺陷
-
-| Bug | 位置 | 描述 | 严重度 |
-|-----|------|------|--------|
-| #1 | `task.go` | Progress 增量硬编码为 1 | Medium |
-| #2 | `bag.go` | RemoveItem 缺少 count≤0 校验 | Critical |
-| #3 | `signin.go` | ClaimReward 可重复领取 | High |
-
-## 协议
+### 手动运行
 
 ```bash
-# 查询
-> {"cmd": "playermgr", "playerId": 10001, "sub": "bag"}
-> {"cmd": "playermgr", "playerId": 10001, "sub": "task"}
-> {"cmd": "playermgr", "playerId": 10001, "sub": "achievement"}
-> {"cmd": "playermgr", "playerId": 10001, "sub": "equipment"}
-> {"cmd": "playermgr", "playerId": 10001, "sub": "signin"}
-> {"cmd": "playermgr", "playerId": 10001, "sub": "mail"}
-
-# 操作（入队列）
-> {"cmd": "additem", "playerId": 10001, "itemId": 2001, "count": 5}
-> {"cmd": "removeitem", "playerId": 10001, "itemId": 2001, "count": 3}
-> {"cmd": "checkin", "playerId": 10001, "day": 1}
-> {"cmd": "claimreward", "playerId": 10001, "day": 1}
-> {"cmd": "equip", "playerId": 10001, "slot": "weapon", "itemId": 3001}
-> {"cmd": "unequip", "playerId": 10001, "slot": "weapon"}
-> {"cmd": "claimmail", "playerId": 10001, "mailId": 1}
-
-# 单步执行
-> {"cmd": "next"}
-< {"ok": true, "log": ["[Bag] add item 2001 x5", "[Task] trigger 3001 progress+1 ..."]}
+./bin/server -host 127.0.0.1 -port 5400
 ```
 
-## 项目结构
+WebSocket:
 
-```
-├── cmd/server/main.go              # 入口：server / test 模式
+- `ws://127.0.0.1:5400/ws`
+
+安全说明：
+
+- 当前 demo 默认面向本地可信环境
+- 默认绑定到 `127.0.0.1`
+- WebSocket 升级仅接受 `localhost` / `127.0.0.1` 来源
+
+---
+
+## 5. 预埋缺陷
+
+| Bug | 描述 |
+|---|---|
+| B1 | `RemoveItem` 缺少负数校验 |
+| B2 | 任务进度 / `task.completed` 逻辑异常 |
+| B3 | `collector_100` 计数对象错误 |
+| B4 | 签到奖励重复领取 |
+| B5 | 装备不消耗背包物品 |
+| B6 | `mail.claimed` 事件无人消费 |
+| B7 | 第 7 天奖励 ID 冲突 |
+
+其中最关键的验证点是 **B1**，因为它正对应论文里的 **interface gap**：
+
+Agent 可能已经在理解阶段怀疑 `RemoveItem` 的负数校验有问题，但只有当它真的能够设计并注册一个专门用于验证该异常的命令时，这个怀疑才有机会转化为缺陷证据。
+
+---
+
+## 6. 目录结构
+
+```text
+ai-integration-test-demo/
+├── cmd/server/main.go
 ├── internal/
-│   ├── server/server.go            # WebSocket 服务器 + 消息路由
-│   ├── breakpoint/controller.go    # 断点控制器（next 推进）
-│   ├── player/manager.go           # 玩家管理器（6 模块组合）
-│   ├── bag/bag.go                  # 背包模块
-│   ├── task/task.go                # 任务模块（订阅 item.added）
-│   ├── achievement/achievement.go  # 成就模块（订阅 task.completed + equip.success）
-│   ├── equipment/equipment.go      # 装备模块（订阅 item.added）
-│   ├── signin/signin.go            # 签到模块
-│   ├── mail/mail.go                # 邮件模块（订阅 signin.claimed + achievement.unlocked）
-│   └── event/bus.go               # 事件总线
+│   ├── server/server.go
+│   ├── breakpoint/controller.go
+│   ├── player/manager.go
+│   ├── bag/
+│   ├── task/
+│   ├── achievement/
+│   ├── equipment/
+│   ├── signin/
+│   ├── mail/
+│   └── event/
 ├── ai/
-│   ├── agent/agent.go              # Agent 循环（双通道调度）
-│   ├── tools/tools.go              # 工具定义（代码通道 + 运行时通道）
-│   ├── prompt/system.go            # 系统提示词（双通道 / 仅代码 / 仅日志，支持多等级 Prompt）
-│   └── session/session.go          # WebSocket 会话封装
+│   ├── agent/
+│   ├── tools/
+│   ├── prompt/
+│   ├── knowledge/
+│   ├── codeanalyzer/
+│   └── session/
+├── results/
 ├── scripts/
-│   └── summarize_results.py        # 多次运行结果汇总
-├── Makefile
-└── README.md
+└── Makefile
 ```
+
+---
+
+## 7. 相关文档
+
+- 论文主文档：[`../README.md`](../README.md)
+- 当前运行说明：[`../QUICKSTART.md`](../QUICKSTART.md)
+- 正式实验状态：[`./results/FORMAL_EXPERIMENT_STATUS.md`](./results/FORMAL_EXPERIMENT_STATUS.md)

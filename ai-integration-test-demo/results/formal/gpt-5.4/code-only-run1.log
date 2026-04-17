@@ -1,0 +1,77 @@
+2026/04/16 22:20:15 using Codex CLI provider (model=gpt-5.4)
+2026/04/16 22:20:15 running AI test scenario: code-only (mode: code-only)
+
+========== TEST REPORT ==========
+```json
+{
+  "correlations": [
+    {"id":"R1","source":"Bag","target":"Task","event":"item.added","confidence":"high"},
+    {"id":"R2","source":"Bag","target":"Achievement","event":"item.added","confidence":"high"},
+    {"id":"R3","source":"Bag","target":"Equipment","event":"item.added","confidence":"high"},
+    {"id":"R4","source":"Task","target":"Achievement","event":"task.completed","confidence":"high"},
+    {"id":"R5","source":"Equipment","target":"Achievement","event":"equip.success","confidence":"high"},
+    {"id":"R6","source":"Achievement","target":"Mail","event":"achievement.unlocked","confidence":"high"},
+    {"id":"R7","source":"SignIn","target":"Mail","event":"signin.claimed","confidence":"high"}
+  ],
+  "bugs": [
+    {
+      "id":"B1",
+      "module":"bag",
+      "description":"Hypothesis: RemoveItem accepts negative counts at the business layer. With count < 0, the guard `it.Count < count` does not reject, and `it.Count -= count` increases inventory instead of reducing it.",
+      "severity":"High",
+      "evidence":"internal/bag/bag.go:45-59; command-layer validation exists separately in internal/server/server.go:272-285, so raw bindings can bypass it."
+    },
+    {
+      "id":"B2",
+      "module":"task",
+      "description":"Hypothesis: completed tasks can publish `task.completed` repeatedly because Progress has no guard for `StateCompleted`; any later matching `item.added` event will re-hit the completion branch.",
+      "severity":"Medium",
+      "evidence":"internal/task/task.go:64-79"
+    },
+    {
+      "id":"B3",
+      "module":"achievement",
+      "description":"Hypothesis: `collector_100` counts unlocked achievements, not collected items. The unlock condition increments over `as.achs` state instead of bag contents or item totals.",
+      "severity":"Medium",
+      "evidence":"internal/achievement/achievement.go:66-76"
+    },
+    {
+      "id":"B4",
+      "module":"signin",
+      "description":"Hypothesis: rewards can be claimed without a successful check-in and can be claimed repeatedly. ClaimReward only validates that the day exists, then emits `signin.reward` every time.",
+      "severity":"Medium",
+      "evidence":"internal/signin/signin.go:72-89"
+    },
+    {
+      "id":"B5",
+      "module":"equipment",
+      "description":"Hypothesis: equipping does not consume or validate bag ownership. `item.added` auto-equips eligible items, and direct equip commands write slots without checking inventory, causing state divergence/duplication.",
+      "severity":"High",
+      "evidence":"internal/equipment/equipment.go:42-60; internal/server/server.go:314-325"
+    },
+    {
+      "id":"B6",
+      "module":"mail",
+      "description":"Hypothesis: claiming a mail attachment has no gameplay effect because it only emits `mail.claimed`, and no module subscribes to that event to add items into the bag or otherwise grant rewards.",
+      "severity":"High",
+      "evidence":"internal/mail/mail.go:79-103; only occurrences of `mail.claimed` / `signin.reward` are publishers in internal/mail/mail.go:96 and internal/signin/signin.go:81"
+    },
+    {
+      "id":"B7",
+      "module":"signin",
+      "description":"Hypothesis: hardcoded day-7 reward item ID `3001` collides with other hardcoded semantic IDs (`task 3001`, equipable item 3001). This may be intentional, but the numeric namespace reuse is suspicious and brittle.",
+      "severity":"Low",
+      "evidence":"internal/signin/signin.go:22-30; internal/task/task.go:46-49; internal/equipment/equipment.go:27-30; internal/player/manager.go:47-53"
+    }
+  ],
+  "false_positives": [],
+  "iterations": 1,
+  "files_read": 12,
+  "steps_executed": 4
+}
+```
+
+Key findings: the real cross-module graph is a single per-player event bus chain, not direct module calls. The strongest proven correlations are `Bag -> {Task, Achievement, Equipment}` via `item.added`, then `Task -> Achievement`, `Equipment -> Achievement`, and finally `{Achievement, SignIn} -> Mail`. Every handler filters on `playerID`, so the bus is globally shared but logically partitioned per player.
+
+The highest-risk hypotheses are the business-layer negative remove in [internal/bag/bag.go](/mnt/d/assistant/integration-testing-guide/ai-integration-test-demo/internal/bag/bag.go:45), the reward dead-end in [internal/mail/mail.go](/mnt/d/assistant/integration-testing-guide/ai-integration-test-demo/internal/mail/mail.go:79), and bag/equipment divergence in [internal/equipment/equipment.go](/mnt/d/assistant/integration-testing-guide/ai-integration-test-demo/internal/equipment/equipment.go:42). Static-only note: I did not run the system; these are source-backed hypotheses. No files changed. Remaining risk is that some low-confidence defects, especially B7, may reflect intentional demo design rather than accidental behavior.
+=================================

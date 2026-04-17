@@ -1,0 +1,145 @@
+2026/04/17 10:20:50 game server started on 127.0.0.1:5401
+2026/04/17 10:20:51 client connected: 127.0.0.1:37274
+2026/04/17 10:20:51 using Anthropic API provider (model=glm-5.1, baseURL=https://open.bigmodel.cn/api/anthropic)
+2026/04/17 10:20:51 running AI test scenario: batch-only (mode: batch-only)
+2026/04/17 10:20:55 AI → help {Cmd:help PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:20:55 WS ← {"ok":true,"data":{"commands":[{"cmd":"additem","desc":"enqueue add item (requires playerId, itemId, count\u003e0)"},{"cmd":"removeitem","desc":"enqueue remove item (requires playerId, itemId, count\u003e0)"},{"cmd":"checkin","desc":"enqueue sign-in check-in (requires playerId, day)"},{"cmd":"claimreward","desc":"enqueue claim sign-in reward (requires playerId, day)"},{"cmd":"equip","desc":"enqueue equip item (requires playerId, slot, itemId)"},{"cmd":"unequip","desc":"enqueue unequip slot (requires playerId, slot)"},{"cmd":"claimmail","desc":"enqueue claim mail attachment (requires playerId, mailId)"},{"cmd":"batch","desc":"execute all pending operations and return all logs"},{"cmd":"help","desc":"show this help"}],"customCommands":[]}}
+2026/04/17 10:21:03 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:03 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:21:03 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:1001 Count:5 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:03 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:21:03 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:2001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:03 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/17 10:21:03 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:3001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:03 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/17 10:21:11 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:11 WS ← {"ok":true,"data":{"pendingOps":5,"queued":true}}
+2026/04/17 10:21:11 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:2001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:weapon Name: Target: Action: Desc:}
+2026/04/17 10:21:11 WS ← {"ok":true,"data":{"pendingOps":6,"queued":true}}
+2026/04/17 10:21:11 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:3001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:armor Name: Target: Action: Desc:}
+2026/04/17 10:21:11 WS ← {"ok":true,"data":{"pendingOps":7,"queued":true}}
+2026/04/17 10:21:11 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:1 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:11 WS ← {"ok":true,"data":{"pendingOps":8,"queued":true}}
+2026/04/17 10:21:21 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:21 WS ← {"ok":true,"log":["[Task] add task 3001, target 1","[Task] add task 3002, target 2","[Achievement] add achievement 4001: first_task","[Achievement] add achievement 4002: task_master","[Achievement] add achievement 4003: collector_100","[Achievement] add achievement 4004: fully_equipped","[SignIn] day 1 claimed, reward: item 2001 x1","[Mail] sent: Sign-in Day 1 Reward (id=1)","[Bag] add item 1001 x5","[Bag] add item 2001 x1","[Task] trigger 3001 progress+1 (now 1/1)","[Task] task 3001 completed","[Achievement] unlocked: first_task (id=4001)","[Mail] sent: Achievement Unlocked! (id=4001) (id=2)","[Bag] add item 3001 x1","[Equipment] auto-equip: weapon slot → item 3001","[SignIn] day 1 reward claimed again","[Equipment] auto-equip: weapon slot → item 2001","[Equipment] auto-equip: armor slot → item 3001","[Achievement] unlocked: fully_equipped (id=4004)","[Mail] sent: Achievement Unlocked! (id=4004) (id=3)","[Mail] claimed attachment from mail 1: item 2001 x1"]}
+2026/04/17 10:21:30 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:2 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:30 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:21:30 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:2 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:30 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:21:30 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:2 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:30 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/17 10:21:30 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:3 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:30 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/17 10:21:30 AI → removeitem {Cmd:removeitem PlayerID:10001 Sub: ItemID:1001 Count:3 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:30 WS ← {"ok":true,"data":{"pendingOps":5,"queued":true}}
+2026/04/17 10:21:30 AI → unequip {Cmd:unequip PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:weapon Name: Target: Action: Desc:}
+2026/04/17 10:21:30 WS ← {"ok":true,"data":{"pendingOps":6,"queued":true}}
+2026/04/17 10:21:39 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:39 WS ← {"ok":true,"log":["[SignIn] day 2 claimed, reward: item 2002 x1","[Mail] sent: Sign-in Day 2 Reward (id=4)","[SignIn] day 2 reward claimed again","[Mail] claim failed: mail 2 has no attachment","[Mail] claim failed: mail 3 has no attachment","[Bag] remove item 1001 x3","[Equipment] unequip: weapon slot (was item 2001)"]}
+2026/04/17 10:21:51 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:51 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:21:51 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:3 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:51 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:21:51 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:3 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:51 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/17 10:21:51 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:2001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:weapon Name: Target: Action: Desc:}
+2026/04/17 10:21:51 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/17 10:21:51 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:2001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:armor Name: Target: Action: Desc:}
+2026/04/17 10:21:51 WS ← {"ok":true,"data":{"pendingOps":5,"queued":true}}
+2026/04/17 10:21:51 AI → removeitem {Cmd:removeitem PlayerID:10001 Sub: ItemID:1001 Count:10 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:51 WS ← {"ok":true,"data":{"pendingOps":6,"queued":true}}
+2026/04/17 10:21:51 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:99 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:51 WS ← {"ok":true,"data":{"pendingOps":7,"queued":true}}
+2026/04/17 10:21:56 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:21:56 WS ← {"ok":true,"log":["[SignIn] day 1 already claimed","[SignIn] day 3 claimed, reward: item 2001 x2","[Mail] sent: Sign-in Day 3 Reward (id=5)","[SignIn] day 3 reward claimed again","[Equipment] auto-equip: weapon slot → item 2001","[Equipment] auto-equip: armor slot → item 2001","[Bag] remove item 1001 x10 failed: not enough","[Mail] claim failed: mail 99 not found"]}
+2026/04/17 10:22:02 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:5001 Count:100 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:02 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:22:02 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:4 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:02 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:22:02 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:5 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:02 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/17 10:22:02 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:1 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:02 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/17 10:22:02 AI → unequip {Cmd:unequip PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:armor Name: Target: Action: Desc:}
+2026/04/17 10:22:02 WS ← {"ok":true,"data":{"pendingOps":5,"queued":true}}
+2026/04/17 10:22:02 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:3001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:armor Name: Target: Action: Desc:}
+2026/04/17 10:22:02 WS ← {"ok":true,"data":{"pendingOps":6,"queued":true}}
+2026/04/17 10:22:07 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:07 WS ← {"ok":true,"log":["[Bag] add item 5001 x100","[Achievement] unlocked: collector_100 (id=4003)","[Mail] sent: Achievement Unlocked! (id=4003) (id=6)","[Mail] claimed attachment from mail 4: item 2002 x1","[Mail] claimed attachment from mail 5: item 2001 x2","[Mail] claim failed: mail 1 already claimed","[Equipment] unequip: armor slot (was item 2001)","[Equipment] auto-equip: armor slot → item 3001"]}
+2026/04/17 10:22:21 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:1001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:21 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:22:21 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:1001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:21 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:22:21 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:5 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:21 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/17 10:22:21 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:5 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:21 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/17 10:22:21 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:6 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:21 WS ← {"ok":true,"data":{"pendingOps":5,"queued":true}}
+2026/04/17 10:22:21 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:2001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:weapon Name: Target: Action: Desc:}
+2026/04/17 10:22:21 WS ← {"ok":true,"data":{"pendingOps":6,"queued":true}}
+2026/04/17 10:22:31 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:31 WS ← {"ok":true,"log":["[Bag] add item 1001 x1","[Bag] add item 1001 x1","[SignIn] day 5 claimed, reward: item 2001 x3","[Mail] sent: Sign-in Day 5 Reward (id=7)","[SignIn] day 5 reward claimed again","[Mail] claim failed: mail 6 has no attachment","[Equipment] auto-equip: weapon slot → item 2001"]}
+2026/04/17 10:22:46 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:6001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:46 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:22:46 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:7001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:46 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:22:46 AI → removeitem {Cmd:removeitem PlayerID:10001 Sub: ItemID:1001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:46 WS ← {"ok":false,"err":"invalid count: removeitem requires count \u003e 0 at the command layer"}
+2026/04/17 10:22:46 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:4 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:46 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/17 10:22:46 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:4 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:46 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/17 10:22:46 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:9999 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:weapon Name: Target: Action: Desc:}
+2026/04/17 10:22:46 WS ← {"ok":true,"data":{"pendingOps":5,"queued":true}}
+2026/04/17 10:22:49 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:22:49 WS ← {"ok":true,"log":["[Bag] add item 6001 x1","[Bag] add item 7001 x1","[SignIn] day 4 claimed, reward: item 2002 x2","[Mail] sent: Sign-in Day 4 Reward (id=8)","[SignIn] day 4 reward claimed again","[Equipment] auto-equip: weapon slot → item 9999"]}
+
+========== TEST REPORT ==========
+Now let me check if the day 4 retro-claim triggered task_master (completing day 4 should complete task 3002 for signing in 2 days).
+
+---
+
+# Integration Test Report — Player 10001 (Batch-Only Scenario)
+
+## Correlation Map
+
+| Source Module | Trigger | Target Module(s) | Behavior |
+|---|---|---|---|
+| **SignIn** → checkin | Day claimed | **Mail** | Auto-sends a mail with the sign-in reward as an attachment (e.g., `[Mail] sent: Sign-in Day 1 Reward (id=1)`) |
+| **SignIn** → claimreward | Reward claimed | **SignIn** (self) | Prints `reward claimed again` — always succeeds even if already claimed (no dedup guard) |
+| **Bag** → additem | Item added | **Task** | Adding an item increments task progress (task 3001 "obtain item" completed after first `additem`) |
+| **Task** → completion | Task finished | **Achievement** | Completing a task triggers achievement unlock (task 3001 → achievement 4001 `first_task`) |
+| **Task** → completion | Task finished | **Mail** | Completing a task sends achievement notification mail (e.g., `[Mail] sent: Achievement Unlocked! (id=4001) (id=2)`) |
+| **Bag** → additem | 100 items added | **Achievement** | Adding 100 of one item unlocks achievement 4003 `collector_100` |
+| **Equipment** → equip | Both slots filled | **Achievement** | Having both weapon and armor equipped unlocks achievement 4004 `fully_equipped` |
+| **Equipment** → equip | Item equipped | **Equipment** (self) | Equipping into an occupied slot silently overwrites (auto-equip replaces previous) |
+| **Achievement** → unlock | Achievement unlocked | **Mail** | Achievement unlock auto-sends notification mail, but some have no attachment (achievement mails 4001, 4004, 4003 had no claimable attachment) |
+| **Mail** → claimmail | Mail claimed | **Bag** | Claiming a mail attachment adds the item to bag (e.g., `item 2001 x1` from mail 1) |
+
+## Defect Report
+
+| # | Severity | Module(s) | Description |
+|---|---|---|---|
+| **D1** | 🔴 **High** | SignIn / ClaimReward | **ClaimReward has no duplicate-check.** Calling `claimreward` for a day that was already claimed logs `"day N reward claimed again"` with no error — it always succeeds. This means a player can infinitely claim sign-in rewards by repeatedly calling `claimreward` for the same day. The `checkin` command correctly blocks re-claims (`"day 1 already claimed"`), but `claimreward` does not. |
+| **D2** | 🟠 **Medium** | SignIn | **Day sequence is not enforced.** Player can check in for day 5 without having checked in for day 4. Day 4 can be retroactively claimed later. There is no sequential gating. |
+| **D3** | 🟠 **Medium** | Equipment | **Equipping a non-existent item succeeds.** Equipping `itemId=9999` (never added to bag) logs `auto-equip: weapon slot → item 9999` without error. The server does not validate that the item exists in the player's bag before equipping. |
+| **D4** | 🟠 **Medium** | Equipment | **Equipping into an occupied slot silently overwrites.** When equipping item 2001 into the weapon slot that already held item 2001 (or another item), the previous item is silently replaced with no unequip event, no return-to-bag log, and no warning. |
+| **D5** | 🟡 **Low** | Equipment / Items | **Same item can be equipped in multiple slots simultaneously.** Item 2001 was auto-equipped into both `weapon` and `armor` slots at the same time (`Batch #3` logs). There is no exclusivity check preventing the same item instance from occupying two slots. |
+| **D6** | 🟡 **Low** | Achievement / Mail | **Achievement notification mails have no attachments (except they trigger task chains).** Mails for achievements 4001, 4003, 4004 were sent with `claim failed: mail has no attachment`. This may be intentional (notification-only), but the design is inconsistent — some mails have attachments (sign-in rewards) and some don't, with no visual distinction. |
+| **D7** | 🟡 **Low** | Task | **Task 3002 (target 2) never completed despite completing day 1, 2, 3, 4, and 5.** Task 3002 was initialized at batch start with `target 2`, but even after 5 sign-ins it never triggered a progress update or completion. The sign-in module does not appear to feed into task 3002's progress counter, suggesting a broken or unlinked task trigger. |
+
+## Confidence Assessment
+
+| Finding | Confidence | Rationale |
+|---|---|---|
+| D1 – ClaimReward duplicate | **95%** | Reproduced consistently across Batches 1, 2, 3, 5, 6. Contrast with checkin's correct `"already claimed"` guard is clear evidence. |
+| D2 – Day sequence not enforced | **90%** | Day 5 claimed before day 4, then day 4 retroactively succeeded. Clear ordering violation. |
+| D3 – Equip non-existent item | **95%** | itemId=9999 was never added but equipping it succeeded with no error in Batch 6. |
+| D4 – Silent slot overwrite | **85%** | Observed in multiple batches. No unequip or return-to-bag event logged on overwrite. |
+| D5 – Same item dual-slot | **85%** | Item 2001 appeared in both weapon and armor simultaneously (Batch 3). Could be intentional if items are "types" not "instances", but still likely a bug. |
+| D6 – Achievement mails no attachment | **80%** | Consistently observed. May be by design, but worth flagging as inconsistent UX. |
+| D7 – Task 3002 never progresses | **90%** | Task 3002 was created with target 2 at init. Five sign-ins and multiple item operations never triggered it. Task 3001 (target 1) completed on first additem, confirming the task system works for some triggers but not 3002. |
+| **Correlation Map** | **90-95%** | All cross-module chains were observed directly in batch logs across 6 batch executions. |
+=================================
+2026/04/17 10:23:50 read error: websocket: close 1006 (abnormal closure): unexpected EOF

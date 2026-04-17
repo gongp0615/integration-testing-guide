@@ -1,0 +1,16 @@
+{
+  "date": "2026-04-16",
+  "scenario": "l0",
+  "mode": "l0",
+  "model": "glm-5.1",
+  "host": "127.0.0.1",
+  "port": 5400,
+  "api_key_stored": false,
+  "credential_source": "user-supplied at runtime",
+  "live_run_completed": true,
+  "notes": [
+    "L0 live run completed",
+    "agent registered seven custom commands",
+    "single-run evidence only"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "group": "code-only",
+  "run": 1,
+  "model": "gpt-5.4",
+  "scenario": "code-only",
+  "start_time": "2026-04-16T22:20:15",
+  "duration_seconds": 147,
+  "exit_code": 0,
+  "attempt": 1
+}

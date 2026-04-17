@@ -1,0 +1,128 @@
+2026/04/16 23:06:35 game server started on 127.0.0.1:5410
+2026/04/16 23:06:30 client connected: 127.0.0.1:42584
+2026/04/16 23:06:30 starting gopls LSP server for /mnt/d/assistant/integration-testing-guide/ai-integration-test-demo ...
+2026/04/16 23:06:30 gopls LSP server started successfully
+2026/04/16 23:06:30 using Codex CLI provider (model=gpt-5.4)
+2026/04/16 23:06:30 running AI test scenario: code-batch (mode: code-batch)
+2026/04/16 23:07:06 AI → lsp_symbols ""
+2026/04/16 23:07:06 AI → search_code internal/ "Subscribe"
+2026/04/16 23:07:06 AI → search_code internal/ "Publish"
+2026/04/16 23:07:19 AI → read_file internal/event/bus.go
+2026/04/16 23:07:19 AI → read_file internal/bag/bag.go
+2026/04/16 23:07:19 AI → read_file internal/task/task.go
+2026/04/16 23:07:19 AI → read_file internal/achievement/achievement.go
+2026/04/16 23:07:19 AI → read_file internal/mail/mail.go
+2026/04/16 23:07:19 AI → read_file internal/signin/signin.go
+2026/04/16 23:07:19 AI → read_file internal/equipment/equipment.go
+2026/04/16 23:08:20 AI → search_code internal/ "AddTask("
+2026/04/16 23:08:20 AI → search_code internal/ "AddAchievement("
+2026/04/16 23:08:20 AI → search_code internal/ "mail.claimed"
+2026/04/16 23:08:20 AI → search_code internal/ "signin.reward"
+2026/04/16 23:09:22 AI → read_file internal/player/manager.go
+2026/04/16 23:09:22 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:2001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:09:22 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/16 23:09:22 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:2002 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:09:22 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/16 23:09:22 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:2002 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:09:22 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/16 23:09:22 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:3001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:09:22 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/16 23:09:22 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:3002 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:09:22 WS ← {"ok":true,"data":{"pendingOps":5,"queued":true}}
+2026/04/16 23:09:22 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:09:22 WS ← {"ok":true,"log":["[Task] add task 3001, target 1","[Task] add task 3002, target 2","[Achievement] add achievement 4001: first_task","[Achievement] add achievement 4002: task_master","[Achievement] add achievement 4003: collector_100","[Achievement] add achievement 4004: fully_equipped","[Bag] add item 2001 x1","[Task] trigger 3001 progress+1 (now 1/1)","[Task] task 3001 completed","[Achievement] unlocked: first_task (id=4001)","[Mail] sent: Achievement Unlocked! (id=4001) (id=1)","[Bag] add item 2002 x1","[Task] trigger 3002 progress+1 (now 1/2)","[Bag] add item 2002 x1","[Task] trigger 3002 progress+1 (now 2/2)","[Task] task 3002 completed","[Achievement] unlocked: task_master (id=4002)","[Mail] sent: Achievement Unlocked! (id=4002) (id=2)","[Achievement] unlocked: collector_100 (id=4003)","[Mail] sent: Achievement Unlocked! (id=4003) (id=3)","[Bag] add item 3001 x1","[Equipment] auto-equip: weapon slot → item 3001","[Bag] add item 3002 x1","[Equipment] auto-equip: armor slot → item 3002","[Achievement] unlocked: fully_equipped (id=4004)","[Mail] sent: Achievement Unlocked! (id=4004) (id=4)"]}
+2026/04/16 23:10:09 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:10:09 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/16 23:10:09 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:10:09 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/16 23:10:09 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:10:09 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/16 23:10:09 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:5 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:10:09 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/16 23:10:09 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:10:09 WS ← {"ok":true,"log":["[SignIn] day 1 claimed, reward: item 2001 x1","[Mail] sent: Sign-in Day 1 Reward (id=5)","[SignIn] day 1 reward claimed again","[SignIn] day 1 reward claimed again","[Mail] claimed attachment from mail 5: item 2001 x1"]}
+
+========== TEST REPORT ==========
+```json
+{
+  "correlations": [
+    {
+      "id": "R1",
+      "source": "Bag",
+      "target": "Task",
+      "event": "item.added -> task progress (2001=>3001, 2002=>3002)",
+      "confidence": "high"
+    },
+    {
+      "id": "R2",
+      "source": "Task",
+      "target": "Achievement",
+      "event": "task.completed -> achievement.unlocked (3001=>4001, 3002=>4002)",
+      "confidence": "high"
+    },
+    {
+      "id": "R3",
+      "source": "Achievement",
+      "target": "Mail",
+      "event": "achievement.unlocked -> mail.sent",
+      "confidence": "high"
+    },
+    {
+      "id": "R4",
+      "source": "Bag",
+      "target": "Equipment",
+      "event": "item.added (3001/3002) -> auto equip -> equip.success",
+      "confidence": "high"
+    },
+    {
+      "id": "R5",
+      "source": "Equipment",
+      "target": "Achievement",
+      "event": "equip.success -> fully_equipped achievement",
+      "confidence": "high"
+    },
+    {
+      "id": "R6",
+      "source": "SignIn",
+      "target": "Mail",
+      "event": "signin.claimed -> sign-in reward mail",
+      "confidence": "high"
+    }
+  ],
+  "bugs": [
+    {
+      "id": "B1",
+      "module": "achievement",
+      "description": "Achievement 4003 (collector_100) unlock logic is wrong. onItemAdded counts unlocked achievements instead of collected items, so the collector achievement unlocks after two other achievements are unlocked rather than after collecting 100 items.",
+      "severity": "High",
+      "evidence": "code+log: internal/achievement/achievement.go onItemAdded loops over as.achs and counts AchUnlocked states; runtime log shows '[Achievement] unlocked: collector_100 (id=4003)' immediately after unlocking task_master during the second 2002 add."
+    },
+    {
+      "id": "B2",
+      "module": "mail",
+      "description": "Claiming a mail attachment does not deliver the item to the bag. MailSystem publishes mail.claimed, but no module subscribes to it, so attachments are effectively lost.",
+      "severity": "Critical",
+      "evidence": "code+log: internal/mail/mail.go publishes 'mail.claimed'; search found no subscriber outside its definition; runtime log after claimmail only shows '[Mail] claimed attachment from mail 5: item 2001 x1' with no subsequent '[Bag] add item ...'."
+    },
+    {
+      "id": "B3",
+      "module": "signin",
+      "description": "ClaimReward can be called repeatedly without validation and emits signin.reward, but no module consumes that event. The API reports repeated reward claims in logs, yet no reward is actually granted.",
+      "severity": "High",
+      "evidence": "code+log: internal/signin/signin.go has comment 'Bug #3: no hasClaimedToday check'; ClaimReward always publishes 'signin.reward'; search found no subscriber for signin.reward; runtime log shows '[SignIn] day 1 reward claimed again' twice with no follow-up mail or bag change."
+    }
+  ],
+  "false_positives": [],
+  "iterations": 3,
+  "files_read": 8,
+  "steps_executed": 26
+}
+```
+
+Key findings:
+
+The event chain for the main scenario is consistent and reproducible: `Bag -> Task -> Achievement -> Mail`, with a parallel `Bag -> Equipment -> Achievement` path for equipable items. The batch additem run on player `10001` confirmed both task achievements, the collector achievement, the fully equipped achievement, and their mail notifications.
+
+The defects are in the reward/achievement edges rather than the basic event bus. The most serious issue is mail attachment claiming: the server marks the attachment claimed but never converts it into bag state. The collector achievement is also misimplemented and unlocks from achievement count, not item collection. Finally, `claimreward` is internally inconsistent: it allows repeated claims, but because `signin.reward` has no subscriber, those repeated claims do not actually produce rewards.
+=================================
+2026/04/16 23:11:23 read error: websocket: close 1006 (abnormal closure): unexpected EOF

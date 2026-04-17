@@ -1,0 +1,10 @@
+{
+  "group": "step-only",
+  "run": 1,
+  "model": "glm-5.1",
+  "scenario": "step-only",
+  "start_time": "2026-04-17T10:39:23",
+  "duration_seconds": 645,
+  "exit_code": 0,
+  "attempt": 1
+}

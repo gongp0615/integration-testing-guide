@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/example/ai-integration-test-demo/ai/knowledge"
+	"github.com/example/ai-integration-test-demo/ai/lsp"
 	"github.com/example/ai-integration-test-demo/ai/prompt"
 	"github.com/example/ai-integration-test-demo/ai/session"
 	"github.com/example/ai-integration-test-demo/ai/tools"
@@ -14,40 +16,51 @@ import (
 )
 
 type Agent struct {
-	client      *oai.Client
-	session     *session.Session
-	model       string
-	mode        string
-	codeSummary string
-	fm          *knowledge.FileManager
+	provider   Provider
+	session    *session.Session
+	model      string
+	mode       string
+	promptOpts prompt.PromptOptions
+	fm         *knowledge.FileManager
+	lspClient  *lsp.Client
 }
 
-func New(apiKey, model, baseURL string, sess *session.Session, mode string, codeSummary string, fm *knowledge.FileManager) *Agent {
-	cfg := oai.DefaultConfig(apiKey)
-	if baseURL != "" {
-		cfg.BaseURL = baseURL
+// New creates an Agent with the appropriate LLM provider.
+// Provider selection: "codex" → Codex CLI, "anthropic:" prefix → Anthropic API, otherwise → OpenAI API.
+// lspClient may be nil if LSP is unavailable.
+func New(apiKey, model, baseURL string, sess *session.Session, mode string, promptOpts prompt.PromptOptions, fm *knowledge.FileManager, lspClient *lsp.Client) *Agent {
+	var prov Provider
+	if apiKey == "codex" {
+		log.Printf("using Codex CLI provider (model=%s)", model)
+		prov = NewCodexProvider(model)
+	} else if strings.HasPrefix(baseURL, "https://open.bigmodel.cn/api/anthropic") || strings.Contains(baseURL, "/anthropic") {
+		log.Printf("using Anthropic API provider (model=%s, baseURL=%s)", model, baseURL)
+		prov = NewAnthropicProvider(apiKey, baseURL, model)
+	} else {
+		log.Printf("using OpenAI API provider (model=%s, baseURL=%s)", model, baseURL)
+		prov = NewOpenAIProvider(apiKey, baseURL)
 	}
+
 	return &Agent{
-		client:      oai.NewClientWithConfig(cfg),
-		session:     sess,
-		model:       model,
-		mode:        mode,
-		codeSummary: codeSummary,
-		fm:          fm,
+		provider:   prov,
+		session:    sess,
+		model:      model,
+		mode:       mode,
+		promptOpts: promptOpts,
+		fm:         fm,
+		lspClient:  lspClient,
 	}
 }
 
 func (a *Agent) Run(ctx context.Context, taskDesc string) (string, error) {
-	sysPrompt := prompt.BuildPrompt(a.mode, prompt.PromptOptions{
-		DocContent: a.codeSummary,
-	})
+	sysPrompt := prompt.BuildPrompt(a.mode, a.promptOpts)
 
 	messages := []oai.ChatCompletionMessage{
 		{Role: oai.ChatMessageRoleSystem, Content: sysPrompt},
 		{Role: oai.ChatMessageRoleUser, Content: taskDesc},
 	}
 
-	toolDefs := tools.Definitions(a.mode)
+	toolDefs := tools.Definitions(a.mode, a.lspClient != nil)
 
 	maxIter := 80
 	if a.mode == "code-only" {
@@ -74,9 +87,9 @@ func (a *Agent) Run(ctx context.Context, taskDesc string) (string, error) {
 			req.Tools = toolDefs
 		}
 
-		resp, err := a.client.CreateChatCompletion(ctx, req)
+		resp, err := a.provider.ChatCompletion(ctx, req)
 		if err != nil {
-			return "", fmt.Errorf("openai api error: %w", err)
+			return "", fmt.Errorf("%s error: %w", a.provider.Name(), err)
 		}
 
 		choice := resp.Choices[0]
@@ -96,7 +109,7 @@ func (a *Agent) Run(ctx context.Context, taskDesc string) (string, error) {
 				continue
 			}
 			for _, tc := range choice.Message.ToolCalls {
-				result, err := a.handleToolCall(tc)
+				result, err := a.handleToolCall(ctx, tc)
 				if err != nil {
 					result = fmt.Sprintf("error: %v", err)
 				}
@@ -115,7 +128,7 @@ func (a *Agent) Run(ctx context.Context, taskDesc string) (string, error) {
 	return "", fmt.Errorf("max iterations reached")
 }
 
-func (a *Agent) handleToolCall(tc oai.ToolCall) (string, error) {
+func (a *Agent) handleToolCall(ctx context.Context, tc oai.ToolCall) (string, error) {
 	switch tc.Function.Name {
 	case "send_command":
 		var params tools.SendCommandParams
@@ -165,6 +178,73 @@ func (a *Agent) handleToolCall(tc oai.ToolCall) (string, error) {
 			return err.Error(), nil
 		}
 		return "knowledge.md updated", nil
+
+	case "register_cmd":
+		var params tools.RegisterCmdParams
+		if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
+			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		log.Printf("AI → register_cmd name=%s target=%s action=%s", params.Name, params.Target, params.Action)
+		result, err := a.session.SendCommand(tools.SendCommandParams{
+			Cmd:    "register_cmd",
+			Name:   params.Name,
+			Target: params.Target,
+			Action: params.Action,
+			Desc:   params.Description,
+		})
+		if err != nil {
+			return "", err
+		}
+		out, _ := json.MarshalIndent(result, "", "  ")
+		return string(out), nil
+
+	case "lsp_references":
+		var params tools.LSPReferencesParams
+		if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
+			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		if a.lspClient == nil {
+			return "LSP not available — use search_code as fallback", nil
+		}
+		log.Printf("AI → lsp_references %s %s", params.File, params.Symbol)
+		refs, err := a.lspClient.References(ctx, params.File, params.Symbol)
+		if err != nil {
+			return fmt.Sprintf("lsp_references error: %v", err), nil
+		}
+		out, _ := json.MarshalIndent(refs, "", "  ")
+		return string(out), nil
+
+	case "lsp_definition":
+		var params tools.LSPDefinitionParams
+		if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
+			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		if a.lspClient == nil {
+			return "LSP not available — use read_file as fallback", nil
+		}
+		log.Printf("AI → lsp_definition %s %s", params.File, params.Symbol)
+		defs, err := a.lspClient.Definition(ctx, params.File, params.Symbol)
+		if err != nil {
+			return fmt.Sprintf("lsp_definition error: %v", err), nil
+		}
+		out, _ := json.MarshalIndent(defs, "", "  ")
+		return string(out), nil
+
+	case "lsp_symbols":
+		var params tools.LSPSymbolsParams
+		if err := json.Unmarshal([]byte(tc.Function.Arguments), &params); err != nil {
+			return "", fmt.Errorf("invalid arguments: %w", err)
+		}
+		if a.lspClient == nil {
+			return "LSP not available — use search_code as fallback", nil
+		}
+		log.Printf("AI → lsp_symbols %q", params.Query)
+		syms, err := a.lspClient.Symbols(ctx, params.Query)
+		if err != nil {
+			return fmt.Sprintf("lsp_symbols error: %v", err), nil
+		}
+		out, _ := json.MarshalIndent(syms, "", "  ")
+		return string(out), nil
 
 	default:
 		return "", fmt.Errorf("unknown tool: %s", tc.Function.Name)

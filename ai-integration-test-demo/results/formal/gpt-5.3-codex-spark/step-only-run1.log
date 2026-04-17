@@ -1,0 +1,23 @@
+2026/04/16 16:49:30 game server started on 127.0.0.1:5401
+2026/04/16 16:49:30 client connected: 127.0.0.1:33252
+2026/04/16 16:49:30 using Codex CLI provider (model=gpt-5.3-codex-spark)
+2026/04/16 16:49:30 running AI test scenario: step-only (mode: step-only)
+
+========== TEST REPORT ==========
+### Correlation Map
+No runtime logs were produced in the provided transcript, so I cannot infer any cross-module correlations yet.
+- Source -> Target (evidence: runtime logs): **No correlations discovered (insufficient evidence)**
+
+### Defect Report
+- **No executable test run captured (severity: Low)**
+  - **Log evidence:** None; only command/task description is present, no `send_command` responses/logs.
+  - **Recommended fix:** Execute the step-only scenario for `playerId=10001`, capturing responses from each module call (`playermgr`, module-specific ops, and `next`) before analysis.
+
+- **No defect triage possible without logs (severity: Low)**
+  - **Log evidence:** None.
+  - **Recommended fix:** Collect sequential logs during operation queue execution and re-run this analysis on observed events.
+
+### Confidence Assessment
+- Correlation findings: **95% confidence that no correlations can be confirmed from current transcript** (because evidence is absent).
+- Bug findings: **Very low confidence for actual defects**; current findings are confidence-based on missing data (not runtime behavior).
+=================================

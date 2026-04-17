@@ -1,0 +1,10 @@
+{
+  "group": "l0",
+  "run": 1,
+  "model": "gpt-5.4",
+  "scenario": "l0",
+  "start_time": "2026-04-17T08:30:45",
+  "duration_seconds": 343,
+  "exit_code": 0,
+  "attempt": 1
+}

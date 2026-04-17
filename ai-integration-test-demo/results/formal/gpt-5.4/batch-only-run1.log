@@ -1,0 +1,34 @@
+2026/04/16 14:52:18 game server started on 127.0.0.1:5401
+2026/04/16 14:52:19 using Codex CLI provider (model=gpt-5.4)
+2026/04/16 14:52:19 running AI test scenario: batch-only (mode: batch-only)
+2026/04/16 14:52:19 client connected: 127.0.0.1:41626
+2026/04/16 14:52:52 AI → batch {Cmd:batch PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 14:52:52 WS ← {"ok":true,"log":["[Task] add task 3001, target 1","[Task] add task 3002, target 2","[Achievement] add achievement 4001: first_task","[Achievement] add achievement 4002: task_master","[Achievement] add achievement 4003: collector_100","[Achievement] add achievement 4004: fully_equipped"]}
+
+========== TEST REPORT ==========
+### Correlation Map
+- `batch` is not acting as a pure queue flush. On execution for player `10001`, it triggered task bootstrap and achievement bootstrap.
+- Task module seeded:
+  - Task `3001` with target `1`
+  - Task `3002` with target `2`
+- Achievement module seeded:
+  - `4001`: `first_task`
+  - `4002`: `task_master`
+  - `4003`: `collector_100`
+  - `4004`: `fully_equipped`
+- Likely cross-module relationship:
+  - Task progression appears linked to achievement tracking, especially `3001/3002` with `4001/4002`.
+  - Inventory/equipment-related achievements exist (`collector_100`, `fully_equipped`), which suggests inventory and equipment modules are registered into the achievement system even without direct player actions.
+
+### Defect Report
+- `batch` caused stateful initialization even though no explicit operations were enqueued in this scenario. That is an anomaly if `batch` is intended to only execute pending commands.
+- Module coverage is incomplete under `batch-only`: inventory, equipment, mail, sign-in, and reward flows did not emit operational logs, so they were not actually stepped through.
+- Achievement entries were added immediately at startup/execution time. If these are meant to represent unlocks rather than registration, that would be a bug. If they are only definitions/tracked entries, behavior is acceptable but the log wording is ambiguous.
+
+### Confidence Assessment
+- `batch` triggers task/achievement initialization: high confidence.
+- Task-to-achievement coupling exists: medium confidence.
+- Inventory/equipment modules are wired into achievement tracking: medium confidence.
+- `batch` performing unexpected side effects is a defect: medium confidence, depends on intended semantics.
+- Achievement auto-grant bug: low confidence, because the log says `add achievement`, not explicitly `complete` or `claim`.
+=================================

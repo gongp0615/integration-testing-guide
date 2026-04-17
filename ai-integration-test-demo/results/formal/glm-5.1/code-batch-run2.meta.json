@@ -1,0 +1,10 @@
+{
+  "group": "code-batch",
+  "run": 2,
+  "model": "glm-5.1",
+  "scenario": "code-batch",
+  "start_time": "2026-04-17T12:17:25",
+  "duration_seconds": 234,
+  "exit_code": 0,
+  "attempt": 1
+}

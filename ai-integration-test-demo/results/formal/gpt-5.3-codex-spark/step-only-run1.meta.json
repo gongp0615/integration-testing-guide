@@ -1,0 +1,10 @@
+{
+  "group": "step-only",
+  "run": 1,
+  "model": "gpt-5.3-codex-spark",
+  "scenario": "step-only",
+  "start_time": "2026-04-16T16:49:30",
+  "duration_seconds": 10,
+  "exit_code": 0,
+  "attempt": 1
+}

@@ -1,0 +1,233 @@
+2026/04/17 12:24:35 starting gopls LSP server for /mnt/d/assistant/integration-testing-guide/ai-integration-test-demo ...
+2026/04/17 12:24:35 gopls LSP server started successfully
+2026/04/17 12:24:35 using Anthropic API provider (model=glm-5.1, baseURL=https://open.bigmodel.cn/api/anthropic)
+2026/04/17 12:24:35 running AI test scenario: code-only (mode: code-only)
+2026/04/17 12:24:39 AI → search_code internal/ "package "
+2026/04/17 12:24:39 AI → lsp_symbols "Publish"
+2026/04/17 12:24:39 AI → lsp_symbols "Subscribe"
+2026/04/17 12:24:43 AI → read_file internal/event/bus.go
+2026/04/17 12:24:43 AI → read_file internal/bag/bag.go
+2026/04/17 12:24:43 AI → read_file internal/player/manager.go
+2026/04/17 12:24:43 AI → read_file internal/achievement/achievement.go
+2026/04/17 12:24:43 AI → read_file internal/task/task.go
+2026/04/17 12:24:43 AI → read_file internal/mail/mail.go
+2026/04/17 12:24:43 AI → read_file internal/signin/signin.go
+2026/04/17 12:24:43 AI → read_file internal/equipment/equipment.go
+2026/04/17 12:24:43 AI → read_file internal/server/server.go
+2026/04/17 12:24:43 AI → read_file internal/breakpoint/controller.go
+2026/04/17 12:24:46 AI → read_file internal/server/server_test.go
+2026/04/17 12:24:46 AI → search_code internal/ "mail.claimed"
+2026/04/17 12:24:46 AI → search_code internal/ "signin.reward"
+2026/04/17 12:24:46 AI → search_code internal/ "equip.unequipped"
+2026/04/17 12:24:50 AI → search_code internal/ "Subscribe\\("
+2026/04/17 12:24:50 AI → search_code internal/ "Publish\\("
+2026/04/17 12:24:53 AI → search_code internal "Subscribe("
+2026/04/17 12:24:53 AI → search_code internal "Publish(event"
+2026/04/17 12:24:56 AI → search_code internal "RemoveItem"
+2026/04/17 12:24:56 AI → search_code internal "count <= 0"
+2026/04/17 12:24:56 AI → search_code internal "item.added"
+2026/04/17 12:24:59 AI → search_code internal "signin.reward"
+2026/04/17 12:24:59 AI → search_code internal "signin.claimed"
+
+========== TEST REPORT ==========
+Here is my final analysis based on all source code read so far.
+
+---
+
+## Correlation Map & Defect Report
+
+```json
+{
+  "correlations": [
+    {
+      "id": "R1",
+      "source": "Bag",
+      "target": "Task",
+      "event": "item.added",
+      "confidence": "high",
+      "detail": "Bag.AddItem publishes item.added → Task.onItemAdded maps itemIDs 2001→task3001, 2002→task3002 and increments progress"
+    },
+    {
+      "id": "R2",
+      "source": "Bag",
+      "target": "Equipment",
+      "event": "item.added",
+      "confidence": "high",
+      "detail": "Bag.AddItem publishes item.added → Equipment.onItemAdded auto-equips items 3001→weapon, 3002→armor"
+    },
+    {
+      "id": "R3",
+      "source": "Bag",
+      "target": "Achievement",
+      "event": "item.added",
+      "confidence": "high",
+      "detail": "Bag.AddItem publishes item.added → Achievement.onItemAdded checks if 2+ achievements unlocked to trigger collector_100 (achID 4003)"
+    },
+    {
+      "id": "R4",
+      "source": "Task",
+      "target": "Achievement",
+      "event": "task.completed",
+      "confidence": "high",
+      "detail": "Task.Progress publishes task.completed → Achievement.onTaskCompleted maps task3001→ach4001(first_task), task3002→ach4002(task_master)"
+    },
+    {
+      "id": "R5",
+      "source": "Equipment",
+      "target": "Achievement",
+      "event": "equip.success",
+      "confidence": "high",
+      "detail": "Equipment.Equip publishes equip.success → Achievement.onEquipSuccess checks weapon+armor for fully_equipped (achID 4004)"
+    },
+    {
+      "id": "R6",
+      "source": "Achievement",
+      "target": "Mail",
+      "event": "achievement.unlocked",
+      "confidence": "high",
+      "detail": "Achievement.Unlock publishes achievement.unlocked → Mail.onAchievementUnlocked sends congratulatory mail"
+    },
+    {
+      "id": "R7",
+      "source": "SignIn",
+      "target": "Mail",
+      "event": "signin.claimed",
+      "confidence": "high",
+      "detail": "SignIn.CheckIn publishes signin.claimed → Mail.onSignInClaimed sends reward mail with attachment"
+    },
+    {
+      "id": "R8",
+      "source": "Mail",
+      "target": "Bag",
+      "event": "mail.claimed",
+      "confidence": "low",
+      "detail": "Mail.ClaimAttachment publishes mail.claimed with itemID/count but NO subscriber exists — claimed items are never added to bag"
+    },
+    {
+      "id": "R9",
+      "source": "Bag",
+      "target": "Bag",
+      "event": "item.removed",
+      "confidence": "low",
+      "detail": "Bag.RemoveItem publishes item.removed but no module subscribes to it"
+    },
+    {
+      "id": "R10",
+      "source": "SignIn",
+      "target": "None",
+      "event": "signin.reward",
+      "confidence": "low",
+      "detail": "SignIn.ClaimReward publishes signin.reward but no module subscribes — event is orphaned"
+    },
+    {
+      "id": "R11",
+      "source": "Equipment",
+      "target": "None",
+      "event": "equip.unequipped",
+      "confidence": "low",
+      "detail": "Equipment.Unequip publishes equip.unequipped but no module subscribes — no bag refund on unequip"
+    }
+  ],
+  "bugs": [
+    {
+      "id": "B1",
+      "module": "bag",
+      "description": "RemoveItem accepts negative count via custom command path, causing item count to INCREASE instead of decrease. The builtin handleRemoveItem validates count>0, but custom registered commands bypass this check and call Bag.RemoveItem directly. A negative count passes the `it.Count < count` guard (e.g., count=1 < -1 is false), then it.Count -= (-1) adds to the count.",
+      "severity": "Critical",
+      "evidence": "server.go:476 custom RemoveItem has no count validation; bag.go:47 `if it.Count < count` does not guard against negative count; confirmed by TestRegisteredRawRemoveExposesB1 in server_test.go:67-95"
+    },
+    {
+      "id": "B2",
+      "module": "mail",
+      "description": "mail.claimed event is published but never subscribed to. When a player claims a mail attachment, the items are never added to their bag. The full chain SignIn→Mail→ClaimAttachment publishes mail.claimed with itemID/count, but nothing adds those items to Bag.",
+      "severity": "Critical",
+      "evidence": "mail.go:95 publishes mail.claimed; no Subscribe(\"mail.claimed\") found anywhere in the codebase"
+    },
+    {
+      "id": "B3",
+      "module": "signin",
+      "description": "ClaimReward has no claimed-already check (comment even says 'Bug #3'). Rewards can be claimed infinitely, each time publishing signin.reward. While signin.reward currently has no subscribers, the duplicate claims bypass the CheckIn guard that sets d.Claimed=true.",
+      "severity": "High",
+      "evidence": "signin.go:73-84, comment on line 78 explicitly states 'Bug #3: no hasClaimedToday check'"
+    },
+    {
+      "id": "B4",
+      "module": "equipment",
+      "description": "Auto-equip on item.added does not verify the item exists in the player's bag. Equipment.onItemAdded triggers Equip whenever itemID 3001 or 3002 is added, but Equip just records the slot — it never removes the item from the bag. Players effectively get to keep the item AND have it equipped.",
+      "severity": "High",
+      "evidence": "equipment.go:42-45 onItemAdded calls Equip directly without consuming from bag; Equip at line 52 only writes to es.slots"
+    },
+    {
+      "id": "B5",
+      "module": "equipment",
+      "description": "Unequip does not return the item to the player's bag. The equip.unequipped event is published but nothing subscribes to it. Items vanish from the equipment system with no refund.",
+      "severity": "Medium",
+      "evidence": "equipment.go:63-68 Unequip deletes from slots and publishes equip.unequipped; no subscriber for equip.unequipped exists"
+    },
+    {
+      "id": "B6",
+      "module": "achievement",
+      "description": "Collector achievement (achID 4003) uses unlocked achievement count as a proxy for 'total items collected'. It counts unlocked achievements, not actual bag items. The check `totalItems >= 2` triggers when 2 achievements of any kind are unlocked, not when 100 items are collected as the name 'collector_100' implies.",
+      "severity": "Medium",
+      "evidence": "achievement.go:51-57 onItemAdded counts `ach.State == AchUnlocked` achievements instead of bag items; name is 'collector_100' but threshold is 2"
+    },
+    {
+      "id": "B7",
+      "module": "achievement",
+      "description": "Cascading unlock chain may be incomplete. When an achievement unlocks (publishing achievement.unlocked→mail), the mail system sends a mail. But if a mail with an attachment is later claimed, the mail.claimed event is orphaned (B2), breaking the reward delivery loop. Additionally, task completion from a sign-in reward item could cascade: CheckIn→signin.claimed→mail with reward→(broken)→no item→no task progress→no achievement.",
+      "severity": "Medium",
+      "evidence": "Tracing R7→R8: SignIn→Mail sends attachment mail, but claiming it (mail.claimed) has no subscriber to add items to bag"
+    },
+    {
+      "id": "B8",
+      "module": "server",
+      "description": "Custom registered commands bypass all business-layer validation. While builtins validate count>0, custom commands directly call module methods. This also applies to Equip with arbitrary slot strings not in the EquipSlot enum, and CheckIn/ClaimReward with no day validation at the raw level.",
+      "severity": "Medium",
+      "evidence": "server.go:470-485 handleCustomCommand directly invokes p.Bag.AddItem, p.SignIn.CheckIn etc. with raw request values"
+    },
+    {
+      "id": "B9",
+      "module": "event",
+      "description": "Synchronous event dispatch in Bus.Publish can cause event cascading within a single breakpoint operation. When one op executes (e.g., AddItem), it synchronously triggers item.added→Task progress→task.completed→Achievement unlock→achievement.unlocked→Mail sent, all within a single Next() call. This makes the log from DrainLog() contain entries from multiple logical operations, making debugging difficult.",
+      "severity": "Low",
+      "evidence": "event/bus.go:37-42 Publish iterates handlers synchronously; breakpoint/controller.go:26 Next runs op.Execute() then drains all accumulated log entries"
+    }
+  ],
+  "false_positives": [
+    {
+      "id": "FP1",
+      "description": "Task.Progress allows progress to exceed Target before capping. This is NOT a bug — the code correctly clamps t.Progress = t.Target after the >= check, and only publishes task.completed once (state changes to completed).",
+      "evidence": "task.go:65-72 sets t.Progress = t.Target and State = StateCompleted after the >= check"
+    }
+  ],
+  "iterations": 9,
+  "files_read": 10,
+  "steps_executed": 15
+}
+```
+
+---
+
+## Summary of Key Findings
+
+### Event Bus Architecture
+The system has **6 modules** communicating through an event bus: **Bag, Task, Achievement, Equipment, SignIn, Mail**, orchestrated by a **Player Manager** and a **breakpoint Controller** (step-through execution). I identified **7 active Publish→Subscribe correlations** and **4 orphaned events** with no subscribers.
+
+### Critical Bugs
+
+1. **B1 — Negative count exploit in RemoveItem (Critical):** The builtin `handleRemoveItem` validates `count > 0`, but custom registered commands bypass this and call `Bag.RemoveItem` directly. A negative count passes the guard `it.Count < count` (since `1 < -1` is false), then `it.Count -= (-1)` **adds** to the count. The project's own test (`TestRegisteredRawRemoveExposesB1`) confirms this bug.
+
+2. **B2 — Mail attachment items never delivered (Critical):** `Mail.ClaimAttachment` publishes `mail.claimed` with `itemID` and `count`, but **nothing subscribes to this event**. The entire reward pipeline from SignIn→Mail→Claim is broken at the final step — players can claim mail but never receive the items.
+
+### High-Severity Bugs
+
+3. **B3 — Infinite reward claims in SignIn (High):** `ClaimReward` has no duplicate-claim guard (the code even has a comment `// Bug #3`). Each call publishes `signin.reward` with full reward data, enabling infinite exploitation.
+
+4. **B4 — Auto-equip doesn't consume items from bag (High):** When an equippable item (3001/3002) is added to the bag, the equipment system auto-equips it but never removes it from the bag. The player effectively gets the item in both their bag and equipment slot simultaneously.
+
+### Architectural Concerns
+
+- **Custom command bypass (B8):** The `register_cmd` system intentionally exposes raw module methods, but this creates an inconsistent validation layer where builtins have guards but custom commands don't.
+- **Orphaned events:** `mail.claimed`, `signin.reward`, `item.removed`, and `equip.unequipped` have no subscribers, suggesting incomplete feature implementation or dead code.
+- **Collector achievement logic error (B6):** The "collector_100" achievement checks for 2 unlocked achievements rather than 100 collected items, making it trivially achievable and semantically wrong.
+=================================

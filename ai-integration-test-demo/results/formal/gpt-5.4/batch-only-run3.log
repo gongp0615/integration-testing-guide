@@ -1,0 +1,37 @@
+2026/04/16 23:15:58 game server started on 127.0.0.1:5403
+2026/04/16 23:15:58 using Codex CLI provider (model=gpt-5.4)
+2026/04/16 23:15:58 running AI test scenario: batch-only (mode: batch-only)
+2026/04/16 23:15:58 client connected: 127.0.0.1:60674
+2026/04/16 23:16:23 AI → help {Cmd:help PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:16:23 WS ← {"ok":true,"data":{"commands":[{"cmd":"additem","desc":"enqueue add item (requires playerId, itemId, count\u003e0)"},{"cmd":"removeitem","desc":"enqueue remove item (requires playerId, itemId, count\u003e0)"},{"cmd":"checkin","desc":"enqueue sign-in check-in (requires playerId, day)"},{"cmd":"claimreward","desc":"enqueue claim sign-in reward (requires playerId, day)"},{"cmd":"equip","desc":"enqueue equip item (requires playerId, slot, itemId)"},{"cmd":"unequip","desc":"enqueue unequip slot (requires playerId, slot)"},{"cmd":"claimmail","desc":"enqueue claim mail attachment (requires playerId, mailId)"},{"cmd":"batch","desc":"execute all pending operations and return all logs"},{"cmd":"help","desc":"show this help"}],"customCommands":[]}}
+2026/04/16 23:16:43 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:1001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:16:43 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/16 23:17:09 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:1001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:weapon Name: Target: Action: Desc:}
+2026/04/16 23:17:09 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/16 23:17:27 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:17:27 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/16 23:17:52 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:17:52 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/16 23:18:07 AI → batch {Cmd:batch PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/16 23:18:07 WS ← {"ok":true,"log":["[Task] add task 3001, target 1","[Task] add task 3002, target 2","[Achievement] add achievement 4001: first_task","[Achievement] add achievement 4002: task_master","[Achievement] add achievement 4003: collector_100","[Achievement] add achievement 4004: fully_equipped","[Bag] add item 1001 x1","[Equipment] auto-equip: weapon slot → item 1001","[SignIn] day 1 claimed, reward: item 2001 x1","[Mail] sent: Sign-in Day 1 Reward (id=1)","[SignIn] day 1 reward claimed again"]}
+
+========== TEST REPORT ==========
+### Correlation Map
+- `Bag -> Equipment`: queuing `additem(1001)` and `equip(weapon, 1001)` in the same batch resulted in `[Bag] add item 1001 x1` followed by `[Equipment] auto-equip: weapon slot -> item 1001`. This suggests batch execution is ordered and the equipment module can consume inventory state produced earlier in the same batch.
+- `SignIn -> Mail`: `checkin(day 1)` produced `[SignIn] day 1 claimed, reward: item 2001 x1` and immediately `[Mail] sent: Sign-in Day 1 Reward (id=1)`. Day-1 sign-in rewards appear to route through the mail system.
+- `Batch/Player Init -> Task/Achievement`: the batch emitted task and achievement creation logs before the requested gameplay actions: tasks `3001/3002` and achievements `4001-4004` were added even though no task/achievement commands were queued. That indicates lazy initialization or automatic progression wiring across systems.
+
+### Defect Report
+- `SignIn reward duplication / inconsistent state`: the same batch contained `checkin(day 1)` and `claimreward(day 1)`. The log first says day 1 was claimed and a reward mail was sent, then says `[SignIn] day 1 reward claimed again`. This is anomalous because either:
+  - duplicate claiming is being allowed, or
+  - duplicate claiming is blocked but logged as success-like behavior.
+  In either case, the SignIn module is not cleanly enforcing or reporting idempotency.
+- `Unexpected side effects from unrelated modules`: task and achievement initialization happened during a batch focused on bag/equipment/sign-in. If intentional, it should be explicit; if not, batch execution is coupling unrelated module setup to arbitrary gameplay operations.
+
+### Confidence Assessment
+- `Bag -> Equipment same-batch dependency`: High.
+- `SignIn -> Mail reward routing`: High.
+- `Batch/Player Init -> Task/Achievement coupling`: Medium.
+- `SignIn reward duplication / inconsistent logging`: High.
+- `Unexpected unrelated side effects as a defect`: Medium.
+=================================

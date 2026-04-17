@@ -1,0 +1,19 @@
+2026/04/17 08:24:03 starting gopls LSP server for /mnt/d/assistant/integration-testing-guide/ai-integration-test-demo ...
+2026/04/17 08:23:56 gopls LSP server started successfully
+2026/04/17 08:23:56 using Codex CLI provider (model=gpt-5.4)
+2026/04/17 08:23:56 running AI test scenario: code-only (mode: code-only)
+
+========== TEST REPORT ==========
+```json
+{
+  "correlations": [],
+  "bugs": [],
+  "false_positives": [],
+  "iterations": 0,
+  "files_read": 0,
+  "steps_executed": 0
+}
+```
+
+Key findings: no pre-built code analysis, source excerpts, symbol graph, or Publish/Subscribe chain data were provided in the conversation, so no concrete cross-module correlations or bug hypotheses can be inferred without inventing evidence. Any specific correlation or bug claim would be speculative. If the code analysis artifact is provided, the next pass should map publishers to subscribers by event name, then inspect handlers for missing validation, unsafe assumptions, hardcoded constants, ignored errors, and unguarded state mutations.
+=================================

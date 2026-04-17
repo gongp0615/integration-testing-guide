@@ -2,3 +2,12 @@ ai-integration-test-demo/bin/
 ai-integration-test-demo/server
 ai-integration-test-demo/knowledge.md
 *.exe
+.omx/
+.codex/*
+!.codex/agents/
+!.codex/agents/**
+!.codex/skills/
+!.codex/skills/**
+.codex/skills/.system/**
+!.codex/prompts/
+!.codex/prompts/**

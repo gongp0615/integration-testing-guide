@@ -1,0 +1,10 @@
+{
+  "group": "code-batch",
+  "run": 2,
+  "model": "gpt-5.4",
+  "scenario": "code-batch",
+  "start_time": "2026-04-17T08:10:49",
+  "duration_seconds": 204,
+  "exit_code": 0,
+  "attempt": 1
+}

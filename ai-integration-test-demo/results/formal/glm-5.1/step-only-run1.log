@@ -1,0 +1,285 @@
+2026/04/17 10:39:23 game server started on 127.0.0.1:5401
+2026/04/17 10:39:23 client connected: 127.0.0.1:43970
+2026/04/17 10:39:23 using Anthropic API provider (model=glm-5.1, baseURL=https://open.bigmodel.cn/api/anthropic)
+2026/04/17 10:39:23 running AI test scenario: step-only (mode: step-only)
+2026/04/17 10:39:43 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:43 WS ← {"ok":true,"data":[]}
+2026/04/17 10:39:43 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:task ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:43 WS ← {"ok":true,"data":[{"taskId":3001,"target":1,"progress":0,"state":"active"},{"taskId":3002,"target":2,"progress":0,"state":"active"}]}
+2026/04/17 10:39:43 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:achievement ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:43 WS ← {"ok":true,"data":[{"achId":4001,"name":"first_task","state":"locked"},{"achId":4002,"name":"task_master","state":"locked"},{"achId":4003,"name":"collector_100","state":"locked"},{"achId":4004,"name":"fully_equipped","state":"locked"}]}
+2026/04/17 10:39:43 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:equipment ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:43 WS ← {"ok":true,"data":{}}
+2026/04/17 10:39:43 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:signin ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:43 WS ← {"ok":true,"data":[{"day":6,"rewardItem":2002,"rewardCount":3,"claimed":false},{"day":7,"rewardItem":3001,"rewardCount":1,"claimed":false},{"day":1,"rewardItem":2001,"rewardCount":1,"claimed":false},{"day":2,"rewardItem":2002,"rewardCount":1,"claimed":false},{"day":3,"rewardItem":2001,"rewardCount":2,"claimed":false},{"day":4,"rewardItem":2002,"rewardCount":2,"claimed":false},{"day":5,"rewardItem":2001,"rewardCount":3,"claimed":false}]}
+2026/04/17 10:39:43 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:mail ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:43 WS ← {"ok":true,"data":[]}
+2026/04/17 10:39:53 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:53 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:39:48 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:48 WS ← {"ok":true,"log":["[Task] add task 3001, target 1","[Task] add task 3002, target 2","[Achievement] add achievement 4001: first_task","[Achievement] add achievement 4002: task_master","[Achievement] add achievement 4003: collector_100","[Achievement] add achievement 4004: fully_equipped","[SignIn] day 1 claimed, reward: item 2001 x1","[Mail] sent: Sign-in Day 1 Reward (id=1)"]}
+2026/04/17 10:39:53 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:mail ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:53 WS ← {"ok":true,"data":[{"mailId":1,"subject":"Sign-in Day 1 Reward","attachment":{"itemId":2001,"count":1},"claimed":false}]}
+2026/04/17 10:39:53 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:2 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:53 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:39:57 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:39:57 WS ← {"ok":true,"log":["[SignIn] day 2 claimed, reward: item 2002 x1","[Mail] sent: Sign-in Day 2 Reward (id=2)"]}
+2026/04/17 10:40:10 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:3 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:10 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:40:13 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:13 WS ← {"ok":true,"log":["[SignIn] day 3 claimed, reward: item 2001 x2","[Mail] sent: Sign-in Day 3 Reward (id=3)"]}
+2026/04/17 10:40:16 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:1 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:16 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:40:19 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:19 WS ← {"ok":true,"log":["[Mail] claimed attachment from mail 1: item 2001 x1"]}
+2026/04/17 10:40:25 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:25 WS ← {"ok":true,"data":[]}
+2026/04/17 10:40:34 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:task ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:34 WS ← {"ok":true,"data":[{"taskId":3001,"target":1,"progress":0,"state":"active"},{"taskId":3002,"target":2,"progress":0,"state":"active"}]}
+2026/04/17 10:40:34 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:achievement ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:34 WS ← {"ok":true,"data":[{"achId":4003,"name":"collector_100","state":"locked"},{"achId":4004,"name":"fully_equipped","state":"locked"},{"achId":4001,"name":"first_task","state":"locked"},{"achId":4002,"name":"task_master","state":"locked"}]}
+2026/04/17 10:40:40 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:2001 Count:5 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:40 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:40:44 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:44 WS ← {"ok":true,"log":["[Bag] add item 2001 x5","[Task] trigger 3001 progress+1 (now 1/1)","[Task] task 3001 completed","[Achievement] unlocked: first_task (id=4001)","[Mail] sent: Achievement Unlocked! (id=4001) (id=4)"]}
+2026/04/17 10:40:56 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:56 WS ← {"ok":true,"data":[{"itemId":2001,"count":5}]}
+2026/04/17 10:40:56 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:task ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:56 WS ← {"ok":true,"data":[{"taskId":3001,"target":1,"progress":1,"state":"completed"},{"taskId":3002,"target":2,"progress":0,"state":"active"}]}
+2026/04/17 10:40:56 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:achievement ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:56 WS ← {"ok":true,"data":[{"achId":4003,"name":"collector_100","state":"locked"},{"achId":4004,"name":"fully_equipped","state":"locked"},{"achId":4001,"name":"first_task","state":"unlocked"},{"achId":4002,"name":"task_master","state":"locked"}]}
+2026/04/17 10:40:56 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:mail ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:40:56 WS ← {"ok":true,"data":[{"mailId":1,"subject":"Sign-in Day 1 Reward","attachment":{"itemId":2001,"count":1},"claimed":true},{"mailId":2,"subject":"Sign-in Day 2 Reward","attachment":{"itemId":2002,"count":1},"claimed":false},{"mailId":3,"subject":"Sign-in Day 3 Reward","attachment":{"itemId":2001,"count":2},"claimed":false},{"mailId":4,"subject":"Achievement Unlocked! (id=4001)","claimed":false}]}
+2026/04/17 10:41:00 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:4001 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:00 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:41:20 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:20 WS ← {"ok":true,"log":["[SignIn] invalid day 0"]}
+2026/04/17 10:41:30 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:achievement ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:30 WS ← {"ok":true,"data":[{"achId":4002,"name":"task_master","state":"locked"},{"achId":4003,"name":"collector_100","state":"locked"},{"achId":4004,"name":"fully_equipped","state":"locked"},{"achId":4001,"name":"first_task","state":"unlocked"}]}
+2026/04/17 10:41:30 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:signin ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:30 WS ← {"ok":true,"data":[{"day":1,"rewardItem":2001,"rewardCount":1,"claimed":true},{"day":2,"rewardItem":2002,"rewardCount":1,"claimed":true},{"day":3,"rewardItem":2001,"rewardCount":2,"claimed":true},{"day":4,"rewardItem":2002,"rewardCount":2,"claimed":false},{"day":5,"rewardItem":2001,"rewardCount":3,"claimed":false},{"day":6,"rewardItem":2002,"rewardCount":3,"claimed":false},{"day":7,"rewardItem":3001,"rewardCount":1,"claimed":false}]}
+2026/04/17 10:41:30 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:30 WS ← {"ok":true,"data":[{"itemId":2001,"count":5}]}
+2026/04/17 10:41:35 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:2 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:35 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:41:35 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:3 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:35 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:41:39 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:39 WS ← {"ok":true,"log":["[Mail] claimed attachment from mail 2: item 2002 x1"]}
+2026/04/17 10:41:40 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:40 WS ← {"ok":true,"log":["[Mail] claimed attachment from mail 3: item 2001 x2"]}
+2026/04/17 10:41:47 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:47 WS ← {"ok":true,"data":[{"itemId":2001,"count":5}]}
+2026/04/17 10:41:56 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:2002 Count:2 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:41:56 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:42:06 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:06 WS ← {"ok":true,"log":["[Bag] add item 2002 x2","[Task] trigger 3002 progress+1 (now 1/2)"]}
+2026/04/17 10:42:12 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:12 WS ← {"ok":true,"data":[{"itemId":2002,"count":2},{"itemId":2001,"count":5}]}
+2026/04/17 10:42:12 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:task ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:12 WS ← {"ok":true,"data":[{"taskId":3001,"target":1,"progress":1,"state":"completed"},{"taskId":3002,"target":2,"progress":1,"state":"active"}]}
+2026/04/17 10:42:21 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:2002 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:21 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:42:31 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:31 WS ← {"ok":true,"log":["[Bag] add item 2002 x1","[Task] trigger 3002 progress+1 (now 2/2)","[Task] task 3002 completed","[Achievement] unlocked: task_master (id=4002)","[Mail] sent: Achievement Unlocked! (id=4002) (id=5)","[Achievement] unlocked: collector_100 (id=4003)","[Mail] sent: Achievement Unlocked! (id=4003) (id=6)"]}
+2026/04/17 10:42:50 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:50 WS ← {"ok":true,"data":[{"itemId":2001,"count":5},{"itemId":2002,"count":3}]}
+2026/04/17 10:42:50 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:achievement ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:50 WS ← {"ok":true,"data":[{"achId":4001,"name":"first_task","state":"unlocked"},{"achId":4002,"name":"task_master","state":"unlocked"},{"achId":4003,"name":"collector_100","state":"unlocked"},{"achId":4004,"name":"fully_equipped","state":"locked"}]}
+2026/04/17 10:42:50 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:mail ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:50 WS ← {"ok":true,"data":[{"mailId":3,"subject":"Sign-in Day 3 Reward","attachment":{"itemId":2001,"count":2},"claimed":true},{"mailId":4,"subject":"Achievement Unlocked! (id=4001)","claimed":false},{"mailId":5,"subject":"Achievement Unlocked! (id=4002)","claimed":false},{"mailId":6,"subject":"Achievement Unlocked! (id=4003)","claimed":false},{"mailId":1,"subject":"Sign-in Day 1 Reward","attachment":{"itemId":2001,"count":1},"claimed":true},{"mailId":2,"subject":"Sign-in Day 2 Reward","attachment":{"itemId":2002,"count":1},"claimed":true}]}
+2026/04/17 10:42:55 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:4002 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:55 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:42:55 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:4003 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:42:55 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:43:03 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:43:03 WS ← {"ok":true,"log":["[SignIn] invalid day 0"]}
+2026/04/17 10:43:06 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:43:06 WS ← {"ok":true,"log":["[SignIn] invalid day 0"]}
+2026/04/17 10:43:14 AI → additem {Cmd:additem PlayerID:10001 Sub: ItemID:3001 Count:1 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:43:14 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:43:24 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:43:24 WS ← {"ok":true,"log":["[Bag] add item 3001 x1","[Equipment] auto-equip: weapon slot → item 3001"]}
+2026/04/17 10:43:40 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:43:40 WS ← {"ok":true,"data":[{"itemId":3001,"count":1},{"itemId":2001,"count":5},{"itemId":2002,"count":3}]}
+2026/04/17 10:43:40 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:equipment ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:43:40 WS ← {"ok":true,"data":{"weapon":{"slot":"weapon","itemId":3001}}}
+2026/04/17 10:43:45 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:2001 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:armor Name: Target: Action: Desc:}
+2026/04/17 10:43:45 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:44:08 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:08 WS ← {"ok":true,"log":["[Equipment] auto-equip: armor slot → item 2001","[Achievement] unlocked: fully_equipped (id=4004)","[Mail] sent: Achievement Unlocked! (id=4004) (id=7)"]}
+2026/04/17 10:44:10 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:equipment ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:10 WS ← {"ok":true,"data":{"armor":{"slot":"armor","itemId":2001},"weapon":{"slot":"weapon","itemId":3001}}}
+2026/04/17 10:44:10 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:achievement ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:10 WS ← {"ok":true,"data":[{"achId":4001,"name":"first_task","state":"unlocked"},{"achId":4002,"name":"task_master","state":"unlocked"},{"achId":4003,"name":"collector_100","state":"unlocked"},{"achId":4004,"name":"fully_equipped","state":"unlocked"}]}
+2026/04/17 10:44:10 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:10 WS ← {"ok":true,"data":[{"itemId":3001,"count":1},{"itemId":2001,"count":5},{"itemId":2002,"count":3}]}
+2026/04/17 10:44:16 AI → unequip {Cmd:unequip PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:armor Name: Target: Action: Desc:}
+2026/04/17 10:44:16 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:44:22 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:22 WS ← {"ok":true,"log":["[Equipment] unequip: armor slot (was item 2001)"]}
+2026/04/17 10:44:26 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:equipment ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:26 WS ← {"ok":true,"data":{"weapon":{"slot":"weapon","itemId":3001}}}
+2026/04/17 10:44:26 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:26 WS ← {"ok":true,"data":[{"itemId":2002,"count":3},{"itemId":3001,"count":1},{"itemId":2001,"count":5}]}
+2026/04/17 10:44:32 AI → removeitem {Cmd:removeitem PlayerID:10001 Sub: ItemID:2001 Count:2 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:32 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:44:35 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:35 WS ← {"ok":true,"log":["[Bag] remove item 2001 x2"]}
+2026/04/17 10:44:38 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:38 WS ← {"ok":true,"data":[{"itemId":2001,"count":3},{"itemId":2002,"count":3},{"itemId":3001,"count":1}]}
+2026/04/17 10:44:53 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:4 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:53 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:44:53 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:5 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:53 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:44:53 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:6 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:53 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/17 10:44:53 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:7 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:53 WS ← {"ok":true,"data":{"pendingOps":4,"queued":true}}
+2026/04/17 10:44:50 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:44:50 WS ← {"ok":true,"log":["[SignIn] day 4 claimed, reward: item 2002 x2","[Mail] sent: Sign-in Day 4 Reward (id=8)"]}
+2026/04/17 10:45:15 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:15 WS ← {"ok":true,"log":["[SignIn] day 5 claimed, reward: item 2001 x3","[Mail] sent: Sign-in Day 5 Reward (id=9)"]}
+2026/04/17 10:45:17 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:17 WS ← {"ok":true,"log":["[SignIn] day 6 claimed, reward: item 2002 x3","[Mail] sent: Sign-in Day 6 Reward (id=10)"]}
+2026/04/17 10:45:30 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:30 WS ← {"ok":true,"log":["[SignIn] day 7 claimed, reward: item 3001 x1","[Mail] sent: Sign-in Day 7 Reward (id=11)"]}
+2026/04/17 10:45:34 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:34 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:45:34 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:8 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:34 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:45:34 AI → checkin {Cmd:checkin PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:34 WS ← {"ok":true,"data":{"pendingOps":3,"queued":true}}
+2026/04/17 10:45:36 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:36 WS ← {"ok":true,"log":["[SignIn] day 1 already claimed"]}
+2026/04/17 10:45:40 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:40 WS ← {"ok":true,"log":["[SignIn] invalid day 8"]}
+2026/04/17 10:45:49 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:45:49 WS ← {"ok":true,"log":["[SignIn] invalid day 0"]}
+2026/04/17 10:46:08 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:4 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:08 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:46:08 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:5 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:08 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:46:02 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:02 WS ← {"ok":true,"log":["[Mail] claim failed: mail 4 has no attachment"]}
+2026/04/17 10:46:11 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:11 WS ← {"ok":true,"log":["[Mail] claim failed: mail 5 has no attachment"]}
+2026/04/17 10:46:21 AI → claimmail {Cmd:claimmail PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:8 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:21 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:46:29 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:29 WS ← {"ok":true,"log":["[Mail] claimed attachment from mail 8: item 2002 x2"]}
+2026/04/17 10:46:40 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:40 WS ← {"ok":true,"data":[{"itemId":2001,"count":3},{"itemId":2002,"count":3},{"itemId":3001,"count":1}]}
+2026/04/17 10:46:44 AI → unequip {Cmd:unequip PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:weapon Name: Target: Action: Desc:}
+2026/04/17 10:46:44 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:46:47 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:47 WS ← {"ok":true,"log":["[Equipment] unequip: weapon slot (was item 3001)"]}
+2026/04/17 10:46:53 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:equipment ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:53 WS ← {"ok":true,"data":{}}
+2026/04/17 10:46:53 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:53 WS ← {"ok":true,"data":[{"itemId":2001,"count":3},{"itemId":2002,"count":3},{"itemId":3001,"count":1}]}
+2026/04/17 10:46:58 AI → help {Cmd:help PlayerID:0 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:46:58 WS ← {"ok":true,"data":{"commands":[{"cmd":"playermgr","desc":"query player data, sub: bag/task/achievement/equipment/signin/mail"},{"cmd":"additem","desc":"enqueue add item (requires playerId, itemId, count\u003e0)"},{"cmd":"removeitem","desc":"enqueue remove item (requires playerId, itemId, count\u003e0)"},{"cmd":"checkin","desc":"enqueue sign-in check-in (requires playerId, day)"},{"cmd":"claimreward","desc":"enqueue claim sign-in reward (requires playerId, day)"},{"cmd":"equip","desc":"enqueue equip item (requires playerId, slot, itemId)"},{"cmd":"unequip","desc":"enqueue unequip slot (requires playerId, slot)"},{"cmd":"claimmail","desc":"enqueue claim mail attachment (requires playerId, mailId)"},{"cmd":"next","desc":"execute one pending operation and return logs"},{"cmd":"help","desc":"show this help"}],"customCommands":[]}}
+2026/04/17 10:47:10 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:1 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:10 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:47:10 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:4 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:10 WS ← {"ok":true,"data":{"pendingOps":2,"queued":true}}
+2026/04/17 10:47:16 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:16 WS ← {"ok":true,"log":["[SignIn] day 1 reward claimed again"]}
+2026/04/17 10:47:20 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:20 WS ← {"ok":true,"log":["[SignIn] day 4 reward claimed again"]}
+2026/04/17 10:47:25 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:bag ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:25 WS ← {"ok":true,"data":[{"itemId":2001,"count":3},{"itemId":2002,"count":3},{"itemId":3001,"count":1}]}
+2026/04/17 10:47:34 AI → claimreward {Cmd:claimreward PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:4004 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:34 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:47:43 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:43 WS ← {"ok":true,"log":["[SignIn] invalid day 0"]}
+2026/04/17 10:47:58 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:mail ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:58 WS ← {"ok":true,"data":[{"mailId":5,"subject":"Achievement Unlocked! (id=4002)","claimed":false},{"mailId":8,"subject":"Sign-in Day 4 Reward","attachment":{"itemId":2002,"count":2},"claimed":true},{"mailId":11,"subject":"Sign-in Day 7 Reward","attachment":{"itemId":3001,"count":1},"claimed":false},{"mailId":4,"subject":"Achievement Unlocked! (id=4001)","claimed":false},{"mailId":2,"subject":"Sign-in Day 2 Reward","attachment":{"itemId":2002,"count":1},"claimed":true},{"mailId":3,"subject":"Sign-in Day 3 Reward","attachment":{"itemId":2001,"count":2},"claimed":true},{"mailId":6,"subject":"Achievement Unlocked! (id=4003)","claimed":false},{"mailId":7,"subject":"Achievement Unlocked! (id=4004)","claimed":false},{"mailId":9,"subject":"Sign-in Day 5 Reward","attachment":{"itemId":2001,"count":3},"claimed":false},{"mailId":10,"subject":"Sign-in Day 6 Reward","attachment":{"itemId":2002,"count":3},"claimed":false},{"mailId":1,"subject":"Sign-in Day 1 Reward","attachment":{"itemId":2001,"count":1},"claimed":true}]}
+2026/04/17 10:47:58 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:achievement ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:47:58 WS ← {"ok":true,"data":[{"achId":4004,"name":"fully_equipped","state":"unlocked"},{"achId":4001,"name":"first_task","state":"unlocked"},{"achId":4002,"name":"task_master","state":"unlocked"},{"achId":4003,"name":"collector_100","state":"unlocked"}]}
+2026/04/17 10:48:25 AI → equip {Cmd:equip PlayerID:10001 Sub: ItemID:9999 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot:weapon Name: Target: Action: Desc:}
+2026/04/17 10:48:25 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+2026/04/17 10:48:28 AI → next {Cmd:next PlayerID:10001 Sub: ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:48:28 WS ← {"ok":true,"log":["[Equipment] auto-equip: weapon slot → item 9999"]}
+2026/04/17 10:49:02 AI → playermgr {Cmd:playermgr PlayerID:10001 Sub:equipment ItemID:0 Count:0 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:49:02 WS ← {"ok":true,"data":{"weapon":{"slot":"weapon","itemId":9999}}}
+2026/04/17 10:49:09 AI → removeitem {Cmd:removeitem PlayerID:10001 Sub: ItemID:2001 Count:10 TaskID:0 AchID:0 Day:0 MailID:0 Slot: Name: Target: Action: Desc:}
+2026/04/17 10:49:09 WS ← {"ok":true,"data":{"pendingOps":1,"queued":true}}
+
+========== TEST REPORT ==========
+## Final Report: Integration Test Results for Player 10001
+
+---
+
+### Correlation Map
+
+| # | Source Event | Target Module(s) | Event Chain (Runtime Log Evidence) |
+|---|---|---|---|
+| 1 | **SignIn → Mail** | `checkin(day)` triggers mail creation | `[SignIn] day X claimed, reward: item XXXX xN` → `[Mail] sent: Sign-in Day X Reward (id=N)` |
+| 2 | **Bag → Task** | `additem` triggers task progress | `[Bag] add item 2001 x5` → `[Task] trigger 3001 progress+1 (now 1/1)` |
+| 3 | **Task → Achievement** | Task completion triggers achievement unlock | `[Task] task 3001 completed` → `[Achievement] unlocked: first_task (id=4001)` |
+| 4 | **Task → Achievement** | Second task completion cascades further | `[Task] task 3002 completed` → `[Achievement] unlocked: task_master (id=4002)` AND `[Achievement] unlocked: collector_100 (id=4003)` |
+| 5 | **Achievement → Mail** | Achievement unlock sends notification mail | `[Achievement] unlocked: first_task (id=4001)` → `[Mail] sent: Achievement Unlocked! (id=4001) (id=4)` |
+| 6 | **Bag → Equipment** | Adding item 3001 auto-equips to weapon | `[Bag] add item 3001 x1` → `[Equipment] auto-equip: weapon slot → item 3001` |
+| 7 | **Equipment → Achievement** | Equipping both slots unlocks achievement | `[Equipment] auto-equip: armor slot → item 2001` → `[Achievement] unlocked: fully_equipped (id=4004)` → `[Mail] sent: Achievement Unlocked! (id=4004) (id=7)` |
+
+**Full cascade example:** `additem(2002 x1)` → Bag updated → Task 3002 progress+1 → Task 3002 completed → Achievement 4002 unlocked → Mail sent → Achievement 4003 unlocked → Mail sent
+
+---
+
+### Defect Report
+
+#### Bug 1: Mail attachment items are never added to the Bag
+- **Severity: Critical**
+- **Log evidence:** `[Mail] claimed attachment from mail 1: item 2001 x1` — but querying bag afterwards shows no change. Same confirmed for mail 2 (item 2002 x1), mail 3 (item 2001 x2), and mail 8 (item 2002 x2).
+- **State proof:** Bag remained at `{2001: 5, 2002: 3}` across multiple mail claims that should have added `{2001: +3, 2002: +3}`.
+- **Recommended fix:** The `claimmail` handler logs the item grant but does not emit the bag-add event. Add a `Bag.addItem` call or event emission inside the mail claim execution path so items actually enter the player's inventory.
+
+#### Bug 2: `claimreward` with `achId` parameter silently misroutes to SignIn as "invalid day 0"
+- **Severity: High**
+- **Log evidence:** Calling `claimreward` with `achId=4001` (and 4002, 4003, 4004) produces `[SignIn] invalid day 0` every time. The server ignores the `achId` field, defaults `day` to 0, and routes to the SignIn module.
+- **Recommended fix:** Either (a) add a separate `claimachievement` command for achievement rewards, or (b) extend `claimreward` to accept both `achId` and `day` parameters and route to the correct module. Also add input validation to reject unknown parameter combinations.
+
+#### Bug 3: Achievement reward mails have no attachments — rewards are unclaimable
+- **Severity: High**
+- **Log evidence:** Achievement mails (IDs 4, 5, 6, 7) all have `no attachment` field. Attempting `claimmail` on them returns `[Mail] claim failed: mail 4 has no attachment`. All 4 achievements remain in `state: unlocked` with no path to claim rewards.
+- **Root cause:** The Achievement→Mail event sends only a notification mail without attaching any reward items. Combined with Bug 2 (`claimreward` doesn't work for achievements), players can never obtain achievement rewards.
+- **Recommended fix:** Attach reward items to achievement notification mails, or implement a working `claimachievement` command that grants rewards directly.
+
+#### Bug 4: `equip` command does not validate item existence in Bag — ghost equips
+- **Severity: Medium**
+- **Log evidence:** `[Equipment] auto-equip: weapon slot → item 9999` — succeeded for an item not in the bag. Equipment state confirmed: `weapon: { itemId: 9999 }`.
+- **Recommended fix:** Validate that `itemId` exists in the player's bag before allowing equip. Return an error if the item is not owned.
+
+#### Bug 5: `equip`/`unequip` does not sync with Bag — item duplication
+- **Severity: Medium**
+- **Log evidence:** Equipping item 2001 as armor (`[Equipment] auto-equip: armor slot → item 2001`) did not remove it from the bag. Bag still showed `2001: count 5`. Unequipping (`[Equipment] unequip: armor slot (was item 2001)`) also did not modify bag count.
+- **State proof:** After equip+unequip cycle, item 2001 count remained 5 throughout.
+- **Recommended fix:** On equip, decrement item count in bag (or mark as reserved). On unequip, increment it back. This prevents item duplication via equip.
+
+#### Bug 6: `claimreward` allows re-claiming already-claimed sign-in rewards
+- **Severity: Low**
+- **Log evidence:** Calling `claimreward(day=1)` after day 1 was already checked in returned `[SignIn] day 1 reward claimed again` — no error, just a soft warning. The operation is accepted and queued without rejection.
+- **Recommended fix:** Return an error and reject the operation at enqueue time if the sign-in day reward has already been claimed, rather than silently accepting and soft-failing.
+
+---
+
+### Confidence Assessment
+
+| Finding | Confidence | Rationale |
+|---|---|---|
+| Correlation: SignIn → Mail | **100%** | Observed consistently across all 7 check-in days |
+| Correlation: Bag → Task | **100%** | Observed on 3 separate additem calls triggering task progress |
+| Correlation: Task → Achievement | **100%** | Both task completions triggered achievement unlocks |
+| Correlation: Achievement → Mail | **100%** | All 4 achievement unlocks triggered mail sends |
+| Correlation: Bag → Equipment (auto-equip) | **100%** | Item 3001 auto-equipped to weapon on add |
+| Correlation: Equipment → Achievement | **100%** | Fully equipping both slots triggered fully_equipped |
+| Bug 1: Mail items not added to bag | **95%** | Reproduced 4 times with consistent bag state snapshots. Small chance bag uses a different internal pool, but from player perspective, items are lost. |
+| Bug 2: claimreward achId misroute | **100%** | Reproduced 4 times with different achIds, all produce `[SignIn] invalid day 0` |
+| Bug 3: Achievement mails have no attachment | **100%** | Confirmed by querying mail state and attempting claims |
+| Bug 4: Ghost equip of nonexistent item | **100%** | Reproduced with itemId=9999, confirmed in equipment state |
+| Bug 5: Equip doesn't sync bag | **95%** | Observed across multiple equip/unequip cycles — item counts never changed. Could be intentional design but highly likely a defect. |
+| Bug 6: Re-claimable sign-in rewards | **90%** | The soft "claimed again" message suggests the server is aware but doesn't reject — could be defensive coding, but still violates expected idempotency. |
+=================================
+2026/04/17 10:50:08 read error: websocket: close 1006 (abnormal closure): unexpected EOF

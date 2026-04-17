@@ -1,0 +1,17 @@
+{
+  "date": "2026-04-16",
+  "scenario": "l1",
+  "mode": "l1",
+  "model": "glm-5.1",
+  "host": "127.0.0.1",
+  "port": 5400,
+  "api_key_stored": false,
+  "credential_source": "user-supplied at runtime",
+  "live_run_completed": true,
+  "artifact_audit_note": "The original l1-run1.log contained a single out-of-order timestamp on the test_remove_negative execution line; the timestamp was normalized post-run to preserve monotonic ordering. Command order was already consistent with line order and server behavior.",
+  "notes": [
+    "register_cmd MVP used during live run",
+    "B1 reproduced through test_remove_negative",
+    "single-run evidence only"
+  ]
+}

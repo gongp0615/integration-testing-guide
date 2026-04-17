@@ -1,0 +1,123 @@
+2026/04/17 08:24:14 starting gopls LSP server for /mnt/d/assistant/integration-testing-guide/ai-integration-test-demo ...
+2026/04/17 08:24:14 gopls LSP server started successfully
+2026/04/17 08:24:14 using Codex CLI provider (model=gpt-5.4)
+2026/04/17 08:24:14 running AI test scenario: code-only (mode: code-only)
+
+========== TEST REPORT ==========
+```json
+{
+  "correlations": [
+    {
+      "id": "R1",
+      "source": "bag",
+      "target": "task",
+      "event": "item.added",
+      "confidence": "high"
+    },
+    {
+      "id": "R2",
+      "source": "bag",
+      "target": "equipment",
+      "event": "item.added",
+      "confidence": "high"
+    },
+    {
+      "id": "R3",
+      "source": "bag",
+      "target": "achievement",
+      "event": "item.added",
+      "confidence": "high"
+    },
+    {
+      "id": "R4",
+      "source": "task",
+      "target": "achievement",
+      "event": "task.completed",
+      "confidence": "high"
+    },
+    {
+      "id": "R5",
+      "source": "equipment",
+      "target": "achievement",
+      "event": "equip.success",
+      "confidence": "high"
+    },
+    {
+      "id": "R6",
+      "source": "achievement",
+      "target": "mail",
+      "event": "achievement.unlocked",
+      "confidence": "high"
+    },
+    {
+      "id": "R7",
+      "source": "signin",
+      "target": "mail",
+      "event": "signin.claimed",
+      "confidence": "high"
+    }
+  ],
+  "bugs": [
+    {
+      "id": "B1",
+      "module": "bag",
+      "description": "Negative counts are blocked only at the server command layer, not in Bag.RemoveItem. A raw/custom command can pass count=-1, bypass the not-enough check, and increase inventory because the code subtracts a negative number.",
+      "severity": "High",
+      "evidence": "internal/bag/bag.go:45-60; internal/server/server.go:272-285; internal/server/server_test.go:60-103"
+    },
+    {
+      "id": "B2",
+      "module": "signin",
+      "description": "ClaimReward does not verify that the day was actually checked in or already claimed. It always emits signin.reward for any valid day, so repeated reward claims are possible by structure.",
+      "severity": "High",
+      "evidence": "internal/signin/signin.go:72-89"
+    },
+    {
+      "id": "B3",
+      "module": "signin/mail",
+      "description": "The reward-claim event chain appears broken: ClaimReward publishes signin.reward, but Mail subscribes only to signin.claimed. That means the explicit reward-claim path has no consumer and likely does not deliver rewards.",
+      "severity": "High",
+      "evidence": "internal/signin/signin.go:80-87; internal/mail/mail.go:35-37,49-61"
+    },
+    {
+      "id": "B4",
+      "module": "achievement",
+      "description": "The collector achievement logic does not count collected items. On item.added, it counts unlocked achievements and unlocks collector_100 when at least two achievements are already unlocked, which does not match the achievement name or intent.",
+      "severity": "Medium",
+      "evidence": "internal/achievement/achievement.go:66-76"
+    },
+    {
+      "id": "B5",
+      "module": "equipment",
+      "description": "Equipment.Equip performs no item-slot validation. The auto-equip path validates through equipableItems, but the public equip command calls Equipment.Equip directly with arbitrary slot and itemId, which can produce fake equip.success events and downstream achievement unlocks.",
+      "severity": "High",
+      "evidence": "internal/equipment/equipment.go:54-60; internal/server/server.go:314-324"
+    },
+    {
+      "id": "B6",
+      "module": "task",
+      "description": "Task.Progress republishes task.completed whenever progress is applied after completion because there is no guard for StateCompleted. Repeated item.added events for the same mapped task can trigger duplicate completion side effects.",
+      "severity": "Medium",
+      "evidence": "internal/task/task.go:64-79"
+    }
+  ],
+  "false_positives": [
+    {
+      "id": "F1",
+      "description": "A naive analysis might infer that ClaimReward drives Mail, but the actual subscriber is on signin.claimed, not signin.reward."
+    },
+    {
+      "id": "F2",
+      "description": "item.removed, equip.unequipped, mail.sent, and mail.claimed are published but have no subscribers in internal/, so they do not form cross-module relationships in the current code."
+    }
+  ],
+  "iterations": 1,
+  "files_read": 13,
+  "steps_executed": 7
+}
+```
+
+Static-analysis summary: the main cross-module chain is `bag.item.added -> task/equipment/achievement`, then `task.completed -> achievement`, `equip.success -> achievement`, `achievement.unlocked -> mail`, and `signin.claimed -> mail`. The strongest bug hypotheses are the negative-remove inventory inflation, the broken/misnamed sign-in reward path, and unrestricted direct equip calls that can fabricate `equip.success`.
+
+All bug findings above are unverified hypotheses from source inspection only. The code also contains several orphaned events, which is useful for avoiding false correlation claims: `signin.reward`, `item.removed`, `equip.unequipped`, `mail.sent`, and `mail.claimed` currently have no subscribers in the server modules.
+=================================

@@ -1,0 +1,14 @@
+[
+  {
+    "name": "test_remove_negative",
+    "target": "bag",
+    "action": "RemoveItem",
+    "description": "raw negative remove to validate missing business-layer check"
+  },
+  {
+    "name": "test_add_zero",
+    "target": "bag",
+    "action": "AddItem",
+    "description": "raw add item to test count=0 bypass"
+  }
+]

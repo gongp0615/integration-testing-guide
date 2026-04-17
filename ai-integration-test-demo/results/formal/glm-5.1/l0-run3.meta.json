@@ -1,0 +1,10 @@
+{
+  "group": "l0",
+  "run": 3,
+  "model": "glm-5.1",
+  "scenario": "l0",
+  "start_time": "2026-04-17T12:44:07",
+  "duration_seconds": 384,
+  "exit_code": 0,
+  "attempt": 1
+}

@@ -1,0 +1,9 @@
+[
+  {"name":"test_add_item","target":"bag","action":"AddItem","description":"Add item to bag with itemId and count"},
+  {"name":"test_remove_item","target":"bag","action":"RemoveItem","description":"Remove item from bag - bypasses server count>0 check"},
+  {"name":"test_checkin","target":"signin","action":"CheckIn","description":"Check in for sign-in day"},
+  {"name":"test_claim_reward","target":"signin","action":"ClaimReward","description":"Claim sign-in reward - potential double-claim bug"},
+  {"name":"test_equip","target":"equipment","action":"Equip","description":"Equip item to slot"},
+  {"name":"test_unequip","target":"equipment","action":"Unequip","description":"Unequip from slot"},
+  {"name":"test_claim_mail","target":"mail","action":"ClaimAttachment","description":"Claim mail attachment"}
+]

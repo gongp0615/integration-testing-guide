@@ -1,0 +1,10 @@
+{
+  "group": "dual",
+  "run": 1,
+  "model": "glm-5.1",
+  "scenario": "dual",
+  "start_time": "2026-04-17T11:41:53",
+  "duration_seconds": 550,
+  "exit_code": 0,
+  "attempt": 1
+}

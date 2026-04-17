@@ -1,0 +1,10 @@
+{
+  "group": "dual",
+  "run": 1,
+  "model": "gpt-5.4",
+  "scenario": "dual",
+  "start_time": "2026-04-16T21:55:59",
+  "duration_seconds": 381,
+  "exit_code": 0,
+  "attempt": 1
+}
