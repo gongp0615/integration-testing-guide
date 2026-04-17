@@ -1,0 +1,5 @@
+go build -o bin/server ./cmd/server
+warning: GOPATH set to GOROOT (/home/gongp/go) has no effect
+2026/04/16 09:12:44 running AI test scenario: code-only (mode: code-only)
+2026/04/16 09:12:46 agent error: openai api error: error, status code: 429, status: 429 Too Many Requests, message: 余额不足或无可用资源包,请充值。
+make: *** [Makefile:45: test-code-only] Error 1

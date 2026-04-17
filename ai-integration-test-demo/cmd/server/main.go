@@ -197,13 +197,13 @@ func getAgentMode(scenario string) string {
 func buildScenario(name string) (string, string) {
 	switch name {
 	case "l0":
-		return `Run BST-Agent in L0 mode on player 10001.
+		return `Run DSMB-Agent in L0 mode on player 10001.
 
 You do not have pre-built business commands. First understand the codebase, then register the commands you need, then execute them step by step.
 
 Your goal is to discover correlations, construct your own validation interfaces, and test normal, abnormal, and boundary behavior without relying on human-authored test guidance.`, ""
 	case "l1":
-		return `Run BST-Agent in L1 mode on player 10001.
+		return `Run DSMB-Agent in L1 mode on player 10001.
 
 You have basic built-in business commands, but you may also register new commands whenever the existing interface is insufficient.
 

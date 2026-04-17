@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# BST-Agent Batch Experiment Runner
+# DSMB-Agent Batch Experiment Runner
 #
 # Runs all experiment groups multiple times for statistical validity.
 # Usage:

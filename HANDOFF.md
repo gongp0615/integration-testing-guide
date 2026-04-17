@@ -1,4 +1,4 @@
-# Session Handoff — BST-Agent 论文项目
+# Session Handoff — DSMB-Agent 论文项目
 
 > 更新时间: 2026-04-17 18:00
 > 状态: **所有实验和论文工作已完成**
@@ -7,7 +7,7 @@
 
 ## 1. 项目概述
 
-BST-Agent 是一篇关于 Agent 驱动集成测试的论文项目。核心思想：用树状命令空间 + 步进思考（Hold World）让 AI Agent 自主探索复杂系统的集成测试。
+DSMB-Agent 是一篇关于 Agent 驱动集成测试的论文项目。核心思想：用树状命令空间 + 步进思考（Hold World）让 AI Agent 自主探索复杂系统的集成测试。
 
 **关键文件：**
 - `README.md` = `PAPER.md` — 论文正文（已是标准学术结构，数据完整）

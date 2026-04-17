@@ -1,4 +1,4 @@
-# BST-Agent Quick Start
+# DSMB-Agent Quick Start
 
 > 这份文档只负责说明**当前原型怎么运行**。方法论与论文主叙事请看 [`README.md`](./README.md)。
 

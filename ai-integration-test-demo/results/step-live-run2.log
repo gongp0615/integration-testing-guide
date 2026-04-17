@@ -1,0 +1,7 @@
+go build -o bin/server ./cmd/server
+warning: GOPATH set to GOROOT (/home/gongp/go) has no effect
+2026/04/16 09:06:01 game server started on 127.0.0.1:5414
+2026/04/16 09:06:02 client connected: 127.0.0.1:47106
+2026/04/16 09:06:02 running AI test scenario: step-only (mode: step-only)
+2026/04/16 09:06:02 agent error: openai api error: error, status code: 429, status: 429 Too Many Requests, message: 余额不足或无可用资源包,请充值。
+make: *** [Makefile:35: test-step-only] Error 1

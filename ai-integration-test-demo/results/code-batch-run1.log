@@ -1,0 +1,18 @@
+2026/04/15 07:25:17 game server started on :15413
+2026/04/15 07:25:18 client connected: 127.0.0.1:54440
+2026/04/15 07:25:18 running AI test scenario: code-batch (mode: code-batch)
+2026/04/15 07:25:25 AI → read_file internal/bag/bag.go
+2026/04/15 07:25:25 AI → read_file internal/checkin/checkin.go
+2026/04/15 07:25:25 AI → read_file internal/reward/reward.go
+2026/04/15 07:25:25 AI → read_file internal/mail/mail.go
+2026/04/15 07:25:25 AI → read_file internal/equip/equip.go
+2026/04/15 07:25:28 AI → search_code internal/ "package"
+2026/04/15 07:25:28 AI → read_file internal/event/event.go
+2026/04/15 07:25:32 AI → read_file internal/event/bus.go
+2026/04/15 07:25:32 AI → read_file internal/achievement/achievement.go
+2026/04/15 07:25:32 AI → read_file internal/equipment/equipment.go
+2026/04/15 07:25:32 AI → read_file internal/signin/signin.go
+2026/04/15 07:25:32 AI → read_file internal/task/task.go
+2026/04/15 07:25:32 AI → read_file internal/player/manager.go
+2026/04/15 07:25:32 AI → read_file internal/server/server.go
+2026/04/15 07:25:32 AI → read_file internal/breakpoint/controller.go

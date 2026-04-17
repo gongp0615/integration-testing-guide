@@ -1,0 +1,7 @@
+go build -o bin/server ./cmd/server
+warning: GOPATH set to GOROOT (/home/gongp/go) has no effect
+2026/04/16 09:11:22 game server started on 127.0.0.1:5422
+2026/04/16 09:11:23 client connected: 127.0.0.1:41534
+2026/04/16 09:11:23 running AI test scenario: dual (mode: dual)
+2026/04/16 09:11:23 agent error: openai api error: error, status code: 429, status: 429 Too Many Requests, message: 余额不足或无可用资源包,请充值。
+make: *** [Makefile:25: test-dual] Error 1

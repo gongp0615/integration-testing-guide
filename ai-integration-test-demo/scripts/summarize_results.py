@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Summarize BST-Agent test run logs with metrics against ground truth."""
+"""Summarize DSMB-Agent test run logs with metrics against ground truth."""
 
 import argparse
 import json
@@ -138,7 +138,7 @@ def evaluate(results: list[dict], gt: dict) -> None:
     efficiency = (corr_tp + bug_tp) / total_iterations if total_iterations > 0 else 0
 
     print(f"\n{'=' * 60}")
-    print(f"  BST-Agent Evaluation Report ({total_runs} runs)")
+    print(f"  DSMB-Agent Evaluation Report ({total_runs} runs)")
     print(f"{'=' * 60}\n")
 
     print("## Overall Metrics")
@@ -169,7 +169,7 @@ def evaluate(results: list[dict], gt: dict) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Evaluate BST-Agent test results")
+    parser = argparse.ArgumentParser(description="Evaluate DSMB-Agent test results")
     parser.add_argument("results_dir", help="Directory containing .log files")
     parser.add_argument("--pattern", default="*.log", help="File glob (default: *.log)")
     args = parser.parse_args()
