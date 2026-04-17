@@ -17,9 +17,10 @@
 
 \title{AI-Driven Integration Testing for Deterministic State Machine Breakpoints}
 
-\author{Anonymous}
-\affiliation{\institution{Anonymous Institution}}
-\email{anonymous@example.com}
+\author{Ping Gong}
+\email{asd28269@gmail.com}
+\affiliation{\institution{Independent Researcher}\country{China}}
+\thanks{Source code and experiment data: \url{https://github.com/gongp0615/ai-driven-integration-testing}}
 
 \begin{abstract}
 Large language models (LLMs) have dramatically improved code generation efficiency, yet system-level verification still depends heavily on manually written test cases. As development accelerates and inter-module dependencies grow increasingly complex, traditional approaches face structural bottlenecks. This paper presents DSMB-Agent, an agent-driven integration testing method for complex systems that shifts the majority of system-level verification work from developers to an autonomous agent through a three-phase process: \emph{Understand--Design--Execute}. The method is built on two core mechanisms: (1)~a \emph{tree-structured command space} that exposes the system under test as a hierarchical \texttt{module$\to$command$\to$parameter} tree, where the agent can both use existing commands and register new ones at runtime to extend its testing capabilities; and (2)~\emph{step-wise reasoning} with a breakpoint controller that splits execution into single steps, allowing the agent to observe causal chains after each step and dynamically adjust its testing direction. On a prototype event-driven game server with 6 business modules and 7 seeded defects, we design three autonomy levels (L0/L1/L2) and a $2\times2$ ablation study, conducting 3 repeated runs on each of two LLMs (GLM-5.1 and GPT-5.4) for a total of 42 experiment runs. Results show that on GLM-5.1, the step-wise execution group discovers an average of 3.7/7 defects versus 1.3/7 for batch execution; on GPT-5.4, the code+batch group performs best (5.0/7); and in L0 mode both models can register a complete test command set from scratch and discover 3--5 defects, while L1 mode on GPT-5.4 achieves a single-run maximum of 6/7, validating the method's cross-model feasibility.
@@ -382,6 +383,7 @@ Bug Precision & True defects / total reported defects \\
 \end{tabular}
 \end{table}
 
+\clearpage
 %% ============================================================
 \section{Experimental Results}
 
@@ -476,6 +478,7 @@ B1 detection rate & 0\% & 0\% & 0\% & 0\% & 67\% \\
 
 \textbf{Finding 5: The most easily detected defects differ between models.} On GLM-5.1, B4 (sign-in reward without idempotency guard) was detected in all 15 L2 runs; B6 (mail attachment chain break) in 12/15. On GPT-5.4, B3 (achievement counting wrong objects) was the most stable (14/15), while B4 and B6 were primarily found in groups with code access (8/15 each). The common trait is that these defects exhibit behavioral anomalies highly visible in logs or code.
 
+\clearpage
 \subsection{Cross-Model Comparison}
 
 Table~\ref{tab:cross-model} merges results from both models (all as 3-run means).
