@@ -1,4 +1,4 @@
-# AI-Driven Integration Testing for Game Servers via Deterministic State Machine Breakpoints
+# AI-Driven Integration Testing for Deterministic State Machine Breakpoints
 
 ---
 

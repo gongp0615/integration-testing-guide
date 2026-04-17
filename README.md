@@ -1,6 +1,6 @@
 # 基于确定性状态机断点的游戏服务端 AI 驱动集成测试
 
-> **AI-Driven Integration Testing for Game Servers via Deterministic State Machine Breakpoints**
+> **AI-Driven Integration Testing for Deterministic State Machine Breakpoints**
 
 ---
 

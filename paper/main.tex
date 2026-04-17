@@ -15,7 +15,7 @@
 
 \begin{document}
 
-\title{AI-Driven Integration Testing for Game Servers via Deterministic State Machine Breakpoints}
+\title{AI-Driven Integration Testing for Deterministic State Machine Breakpoints}
 
 \author{Anonymous}
 \affiliation{\institution{Anonymous Institution}}
@@ -430,7 +430,7 @@ B1 detection rate & 0\% & 0\% & 67\% & 0\% & 33\% \\
 
 To verify whether findings from GLM-5.1 hold across models, we repeated the L2 ablation on GPT-5.4 with 3 runs per group. GPT-5.4 experiments also integrated LSP (gopls) for semantic code analysis.
 
-\begin{table}[t]
+\begin{table}[htbp]
 \caption{L2 defect detection matrix (GPT-5.4, 3 runs).}
 \label{tab:gpt-matrix}
 \small
@@ -449,7 +449,7 @@ B7 & L4 & 1/3 & $\cdot$ & 1/3 & $\cdot$ & $\cdot$ \\
 \end{tabular}
 \end{table}
 
-\begin{table}[t]
+\begin{table}[htbp]
 \caption{L2 summary metrics (GPT-5.4, mean of 3 runs).}
 \label{tab:gpt-summary}
 \small
@@ -474,13 +474,13 @@ B1 detection rate & 0\% & 0\% & 0\% & 0\% & 67\% \\
 
 \textbf{Finding 4: code-only has the highest cross-model stability.} code-only achieves approximately 4/7 defect detection rate on both models, with the highest B1 detection probability among L2 groups (1/3 on GLM-5.1, alongside code-batch's 2/3). However, its inherent limitation is the inability to confirm or rule out false positives through runtime verification.
 
-\textbf{Finding 5: B4 and B6 are the most easily detected defects on both models.} On GLM-5.1, B4 (sign-in reward without idempotency guard) was detected in all 15 L2 runs; B6 (mail attachment chain break) was detected in 12/15 runs. The behavioral anomalies of these two defects are highly visible in logs and require no deep reasoning to identify.
+\textbf{Finding 5: The most easily detected defects differ between models.} On GLM-5.1, B4 (sign-in reward without idempotency guard) was detected in all 15 L2 runs; B6 (mail attachment chain break) in 12/15. On GPT-5.4, B3 (achievement counting wrong objects) was the most stable (14/15), while B4 and B6 were primarily found in groups with code access (8/15 each). The common trait is that these defects exhibit behavioral anomalies highly visible in logs or code.
 
 \subsection{Cross-Model Comparison}
 
 Table~\ref{tab:cross-model} merges results from both models (all as 3-run means).
 
-\begin{table}[t]
+\begin{table}[htbp]
 \caption{Cross-model L2 ablation comparison (mean of 3 runs).}
 \label{tab:cross-model}
 \small
@@ -503,7 +503,7 @@ code-only & 4.0 & 4.0 & Consistent \\
 
 In L0 mode, the agent starts from scratch with no pre-built business commands.
 
-\begin{table}[t]
+\begin{table}[htbp]
 \caption{L0 experiment results.}
 \label{tab:l0}
 \small
@@ -524,7 +524,7 @@ GLM-5.1 averages 3.7/7, GPT-5.4 averages 4.3/7. In all 6 L0 runs across both mod
 
 \subsection{L1 Experiment Results}
 
-\begin{table}[t]
+\begin{table}[htbp]
 \caption{L1 experiment results.}
 \label{tab:l1}
 \small
